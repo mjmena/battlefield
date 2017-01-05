@@ -53,14 +53,17 @@
 	var battlefield = new Battlefield_1["default"](canvas, grid);
 	var ranger = new Location_1["default"](3, 3);
 	var pet = new Location_1["default"](3, 4);
+	var controlled_entities = [ranger, pet];
 	var selected_entity = ranger;
 	document.addEventListener("keydown", function (event) {
 	    var updated = true;
-	    if (event.key === '1') {
-	        selected_entity = ranger;
-	    }
-	    else if (event.key === '2') {
-	        selected_entity = pet;
+	    if (event.key === 'Tab') {
+	        event.preventDefault();
+	        var i = controlled_entities.indexOf(selected_entity) + 1;
+	        if (i >= controlled_entities.length) {
+	            i = 0;
+	        }
+	        selected_entity = controlled_entities[i];
 	    }
 	    else if (event.key === 'ArrowRight') {
 	        event.preventDefault();
