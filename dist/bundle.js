@@ -47,39 +47,10 @@
 	"use strict";
 	var Location_1 = __webpack_require__(1);
 	var Grid_1 = __webpack_require__(2);
+	var Battlefield_1 = __webpack_require__(3);
 	var grid = new Grid_1["default"](20, 15, 50);
 	var canvas = document.getElementById("battlefield");
-	var Battlefield = (function () {
-	    function Battlefield(canvas, grid) {
-	        this.canvas = canvas;
-	        this.grid = grid;
-	        canvas.width = grid.width();
-	        canvas.height = grid.height();
-	        this.entities = [];
-	    }
-	    Battlefield.prototype.addEntity = function (entity) {
-	        this.entities.push(entity);
-	    };
-	    Battlefield.prototype.draw = function () {
-	        var context = canvas.getContext('2d');
-	        context.clearRect(0, 0, canvas.width, canvas.height);
-	        this.entities.forEach(function (entity) {
-	            context.beginPath();
-	            context.arc(entity.x * grid.cell_size - grid.cell_size / 2, entity.y * grid.cell_size - grid.cell_size / 2, grid.cell_size / 2, 0, 2 * Math.PI, false);
-	            context.closePath();
-	            if (entity === selected_entity) {
-	                context.fillStyle = 'green';
-	            }
-	            else {
-	                context.fillStyle = 'red';
-	            }
-	            context.fill();
-	        });
-	        grid.draw(context);
-	    };
-	    return Battlefield;
-	}());
-	var battlefield = new Battlefield(canvas, grid);
+	var battlefield = new Battlefield_1["default"](canvas, grid);
 	var ranger = new Location_1["default"](3, 3);
 	var pet = new Location_1["default"](3, 4);
 	var selected_entity = ranger;
@@ -123,12 +94,12 @@
 	        updated = false;
 	    }
 	    if (updated) {
-	        battlefield.draw();
+	        battlefield.draw(selected_entity);
 	    }
 	});
 	battlefield.addEntity(ranger);
 	battlefield.addEntity(pet);
-	battlefield.draw();
+	battlefield.draw(selected_entity);
 
 
 /***/ },
@@ -183,6 +154,46 @@
 	}());
 	exports.__esModule = true;
 	exports["default"] = Grid;
+
+
+/***/ },
+/* 3 */
+/***/ function(module, exports) {
+
+	"use strict";
+	var Battlefield = (function () {
+	    function Battlefield(canvas, grid) {
+	        this.canvas = canvas;
+	        this.grid = grid;
+	        this.canvas.width = this.grid.width();
+	        this.canvas.height = this.grid.height();
+	        this.entities = [];
+	    }
+	    Battlefield.prototype.addEntity = function (entity) {
+	        this.entities.push(entity);
+	    };
+	    Battlefield.prototype.draw = function (selected_entity) {
+	        var _this = this;
+	        var context = this.canvas.getContext('2d');
+	        context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+	        this.entities.forEach(function (entity) {
+	            context.beginPath();
+	            context.arc(entity.x * _this.grid.cell_size - _this.grid.cell_size / 2, entity.y * _this.grid.cell_size - _this.grid.cell_size / 2, _this.grid.cell_size / 2, 0, 2 * Math.PI, false);
+	            context.closePath();
+	            if (entity === selected_entity) {
+	                context.fillStyle = 'green';
+	            }
+	            else {
+	                context.fillStyle = 'red';
+	            }
+	            context.fill();
+	        });
+	        this.grid.draw(context);
+	    };
+	    return Battlefield;
+	}());
+	exports.__esModule = true;
+	exports["default"] = Battlefield;
 
 
 /***/ }
