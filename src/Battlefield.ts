@@ -1,3 +1,6 @@
+import Location from './Location';
+import Grid from './Grid';
+
 export default class Battlefield {
 	private entities: Location[];
 

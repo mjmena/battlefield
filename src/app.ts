@@ -1,6 +1,10 @@
 import Location from './Location';
 import Grid from './Grid';
 import Battlefield from './Battlefield';
+import * as io from 'socket.io-client';
+
+
+var socket = io();
 
 var grid = new Grid(20, 15, 50);
 
