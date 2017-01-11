@@ -16,13 +16,17 @@ app.get("/", function (req, res) {
 });
 
 io.on('connection', function(socket){
+	socket.emit('create_battlefield', characters.toList());
+
   	socket.on('create_character', function(){
-  		var character = {id: characters.size, x: 10, y: 10}
+  		var character = create_character(10,10);
   		characters = characters.set(character.id, character);
   		io.emit('create_character', character);
+  		console.log(characters.toList().toJS())
 	});
 
 	socket.on('move_character', function(moved_character){
+		console.log(moved_character);
 		characters = characters.set(moved_character.id, moved_character);
   		io.emit('move_character', moved_character);
 	});
@@ -36,3 +40,12 @@ http.listen(80, function(){
 app.use(express.static(publicDir));
 
 console.log("Server showing %s listening at http://%s:%s", publicDir, hostname, port);
+
+function create_character(x,y){
+	var id = 0;
+	if(characters.size > 0){
+		id = characters.last().id + 1;
+	}
+	
+	return {id: id, location: {x: x, y: y}};
+}

@@ -3,6 +3,7 @@ import Character from './Character';
 import Grid from './Grid';
 import Battlefield from './Battlefield';
 import * as io from 'socket.io-client';
+import * as Immutable from 'immutable';
 
 var socket = io();
 
@@ -13,27 +14,42 @@ var canvas =  <HTMLCanvasElement> document.getElementById("battlefield");
 var battlefield = new Battlefield(canvas, grid);
 
 var selected_entity : Character = null;
-var controlled_entities : Character[] = [];
+var controlled_entities = Immutable.List<number>();
 
 document.getElementById('create_chracter').addEventListener('click', (event) => {
 	socket.emit('create_character');
 });
 
-socket.on('create_character', function(character){
-	console.log(character);
-	var new_entity = new Character(character.id, new Location(character.x,character.y));
-	controlled_entities.push(new_entity);
+socket.on('create_battlefield', function(characters){
+	characters.forEach((character) => {
+		var new_character = new Character(character.id, new Location(character.location.x,character.location.y));	
+		battlefield.addEntity(new_character);
+	});
+
+	battlefield.draw(selected_entity);
+});
+
+socket.on('create_controlled_character', function(character){
+	var new_entity = new Character(character.id, new Location(character.location.x,character.location.y));
+	controlled_entities = controlled_entities.push(character.id);
 	selected_entity = new_entity;
 	battlefield.addEntity(new_entity);
-	battlefield.draw(selected_entity);
+	battlefield.draw(selected_entity);	
+ });
+
+socket.on('create_character', function(character){
+	var new_entity = new Character(character.id, new Location(character.location.x,character.location.y));
+	controlled_entities = controlled_entities.push(character.id);
+	selected_entity = new_entity;
+	battlefield.addEntity(new_entity);
+	battlefield.draw(selected_entity);	
  });
 
 socket.on('move_character', function(character){
-	battlefield.entities[character.id] = character;
-	if(selected_entity.id === character.id){
+	battlefield.updateCharacter(character);
+	if(selected_entity && selected_entity.id === character.id){
 		selected_entity = character;
 	}
-	controlled_entities[character.id] = character;
 	battlefield.draw(selected_entity);
 });
 
@@ -42,41 +58,56 @@ document.addEventListener("keydown", (event) => {
 
 	if(event.key === 'Tab'){
 		event.preventDefault();
-		if(controlled_entities && controlled_entities.length > 1){
-			var i = controlled_entities.indexOf(selected_entity) + 1;
-			if (i >= controlled_entities.length){
-				i = 0;
+		if(controlled_entities.size > 1){
+			var index = controlled_entities.findIndex((character_id) => {
+				return character_id === selected_entity.id;
+			}) + 1;
+
+			if (index >= controlled_entities.size){
+				index = 0;
 			}
-			selected_entity = controlled_entities[i];
+			
+			selected_entity = battlefield.getCharacter(controlled_entities.get(index));
 		}
-	}else if(event.key === 'ArrowRight'){
-		event.preventDefault();
-		selected_entity.location.x += 1;
-		if(selected_entity.location.x > battlefield.grid.columns){
-			selected_entity.location.x = battlefield.grid.columns;
+	}else if(selected_entity){
+		var moved = false; 
+		if(event.key === 'ArrowRight'){
+			event.preventDefault();
+			selected_entity.location.x += 1;
+			if(selected_entity.location.x > battlefield.grid.columns){
+				selected_entity.location.x = battlefield.grid.columns;
+			}
+			moved = true;
+			
+		}else if(event.key === 'ArrowLeft'){
+			event.preventDefault();
+			selected_entity.location.x -= 1;
+			if(selected_entity.location.x < 1){
+				selected_entity.location.x = 1;
+			}
+			moved = true; 
+		}else if(event.key === 'ArrowUp'){	
+			event.preventDefault();
+			selected_entity.location.y -= 1;
+			if(selected_entity.location.y < 1){
+				selected_entity.location.y = 1;
+			}
+			moved = true; 
+		}else if(event.key === 'ArrowDown'){
+			event.preventDefault();
+			selected_entity.location.y += 1;
+			if(selected_entity.location.y > battlefield.grid.rows){
+				selected_entity.location.y = battlefield.grid.rows;
+			}
+			moved = true; 
+		}else{
+			updated = false;
 		}
-		socket.emit('move_character', selected_entity);
-	}else if(event.key === 'ArrowLeft'){
-		event.preventDefault();
-		selected_entity.location.x -= 1;
-		if(selected_entity.location.x < 1){
-			selected_entity.location.x = 1;
+
+		if(moved){
+			battlefield.updateCharacter(selected_entity);
+			socket.emit('move_character', selected_entity);
 		}
-		socket.emit('move_character', selected_entity);
-	}else if(event.key === 'ArrowUp'){	
-		event.preventDefault();
-		selected_entity.location.y -= 1;
-		if(selected_entity.location.y < 1){
-			selected_entity.location.y = 1;
-		}
-		socket.emit('move_character', selected_entity);
-	}else if(event.key === 'ArrowDown'){
-		event.preventDefault();
-		selected_entity.location.y += 1;
-		if(selected_entity.location.y > battlefield.grid.rows){
-			selected_entity.location.y = battlefield.grid.rows;
-		}
-		socket.emit('move_character', selected_entity);
 	}else{ 
 		updated = false;
 	}
@@ -86,4 +117,6 @@ document.addEventListener("keydown", (event) => {
 	}
 }) 
 
-battlefield.draw(selected_entity);
+document.addEventListener('onload', () =>{
+	battlefield.draw(selected_entity);
+})
