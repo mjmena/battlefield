@@ -20,6 +20,10 @@ class Entity extends EntityRecord{
 		return entity;
 	}
 
+  move_exact(transform){
+    return this.set('transform', new TransformRecord(transform));
+  }
+
   get_transform_entity(delta_x, delta_y){
     return this.set('transform', new TransformRecord({x:delta_x, y:delta_y}))
   }

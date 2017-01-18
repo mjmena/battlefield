@@ -29,8 +29,12 @@ io.on('connection', function(socket){
 		characters = characters.set(entity.id, characters.get(entity.id).move(entity.transform));
   	io.emit('update_entities', characters);
 	});
-});
 
+  socket.on('move_entity_exact', function(entity){
+		characters = characters.set(entity.id, entity);
+  	io.emit('update_entities', characters);
+	});
+});
 
 http.listen(80, function(){
   console.log('listening on *:80');

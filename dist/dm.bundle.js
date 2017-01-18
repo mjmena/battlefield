@@ -74,8 +74,6 @@
 	
 	var _Battlefield2 = _interopRequireDefault(_Battlefield);
 	
-	var _reactKonva = __webpack_require__(236);
-	
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -90,12 +88,16 @@
 	
 	var entities = Immutable.Map();
 	var current_entity_id = -1;
-	document.getElementById('create_character').addEventListener('click', function (event) {
-		socket.emit('create_character');
-	});
+	
+	var cell = 50;
 	
 	function update() {
-		_reactDom2.default.render(_react2.default.createElement(App, { entities: entities.toList(), current_entity_id: current_entity_id, handleSelectClick: handleSelectClick }), document.getElementById('root'));
+		_reactDom2.default.render(_react2.default.createElement(App, {
+			entities: entities.toList(),
+			current_entity_id: current_entity_id,
+			handleSelectClick: handleSelectClick,
+			handleDragEnd: handleDragEnd
+		}), document.getElementById('root'));
 	}
 	
 	socket.on('update_entities', function (updated_entities) {
@@ -115,6 +117,13 @@
 		console.log("select by click");
 		current_entity_id = entity_id;
 		update();
+	};
+	
+	var handleDragEnd = function handleDragEnd(entity, event) {
+		socket.emit('move_entity_exact', entity.move_exact({
+			x: Math.ceil(event.target.x() / cell),
+			y: Math.ceil(event.target.y() / cell)
+		}));
 	};
 	
 	document.addEventListener("keydown", function (event) {
@@ -162,17 +171,29 @@
 					null,
 					_react2.default.createElement(
 						'div',
-						null,
+						{ style: { float: 'left', width: 500 } },
+						_react2.default.createElement(
+							'button',
+							{ onClick: function onClick(event) {
+									return socket.emit('create_character');
+								} },
+							'Add Entity'
+						),
 						_react2.default.createElement(_EntityList2.default, { entities: entity_list, current_entity_id: this.props.current_entity_id, handleSelectClick: this.props.handleSelectClick })
 					),
+					'`   `    ',
 					_react2.default.createElement(
-						_reactKonva.Stage,
-						{ width: 700, height: 700 },
-						_react2.default.createElement(
-							_reactKonva.Layer,
-							null,
-							_react2.default.createElement(_Battlefield2.default, { entities: entity_list, current_entity_id: this.props.current_entity_id, columns: 15, rows: 15, cell: 50, handleSelectClick: this.props.handleSelectClick })
-						)
+						'div',
+						{ style: { float: 'left' } },
+						_react2.default.createElement(_Battlefield2.default, {
+							entities: entity_list,
+							current_entity_id: this.props.current_entity_id,
+							columns: 20,
+							rows: 15,
+							cell: cell,
+							handleSelectClick: this.props.handleSelectClick,
+							handleDragEnd: this.props.handleDragEnd
+						})
 					)
 				);
 			}
@@ -35319,6 +35340,11 @@
 	      return entity;
 	    }
 	  }, {
+	    key: 'move_exact',
+	    value: function move_exact(transform) {
+	      return this.set('transform', new TransformRecord(transform));
+	    }
+	  }, {
 	    key: 'get_transform_entity',
 	    value: function get_transform_entity(delta_x, delta_y) {
 	      return this.set('transform', new TransformRecord({ x: delta_x, y: delta_y }));
@@ -35499,23 +35525,35 @@
 	      var _this2 = this;
 	
 	      var entities = this.props.entities.map(function (entity) {
+	        var cell = _this2.props.cell;
 	        var circle = {
 	          key: entity.id,
 	          x: entity.transform.x * _this2.props.cell - _this2.props.cell / 2,
 	          y: entity.transform.y * _this2.props.cell - _this2.props.cell / 2,
 	          radius: _this2.props.cell / 2 - 2,
-	          fill: 'red',
+	          fill: 'orange',
 	          stroke: _this2.props.current_entity_id === entity.id ? 'green' : '',
-	          strokeWidth: 4
+	          strokeWidth: 4,
+	          draggable: true,
+	          dragBoundFunc: function dragBoundFunc(pos) {
+	            return {
+	              x: Math.ceil(pos.x / cell) * cell - cell / 2,
+	              y: Math.ceil(pos.y / cell) * cell - cell / 2
+	            };
+	          }
 	        };
-	        return _react2.default.createElement(_reactKonva.Circle, _extends({}, circle, { onClick: _this2.props.handleSelectClick.bind(_this2, entity.id) }));
+	        return _react2.default.createElement(_reactKonva.Circle, _extends({}, circle, { onClick: _this2.props.handleSelectClick.bind(_this2, entity.id), onDragEnd: _this2.props.handleDragEnd.bind(_this2, entity) }));
 	      });
 	
 	      return _react2.default.createElement(
-	        _reactKonva.Group,
-	        null,
-	        entities,
-	        _react2.default.createElement(_Grid2.default, { columns: this.props.columns, rows: this.props.rows, cell: this.props.cell })
+	        _reactKonva.Stage,
+	        { width: this.props.columns * this.props.cell, height: this.props.rows * this.props.cell },
+	        _react2.default.createElement(
+	          _reactKonva.Layer,
+	          null,
+	          entities,
+	          _react2.default.createElement(_Grid2.default, { columns: this.props.columns, rows: this.props.rows, cell: this.props.cell })
+	        )
 	      );
 	    }
 	  }]);
@@ -52640,7 +52678,7 @@
 	    value: function render() {
 	      var _this2 = this;
 	
-	      var columns = _immutable2.default.Range(0, this.props.columns).map(function (column) {
+	      var columns = _immutable2.default.Range(0, this.props.columns + 1).map(function (column) {
 	        var x = column * _this2.props.cell;
 	
 	        var line = {
@@ -52652,7 +52690,7 @@
 	        return _react2.default.createElement(_reactKonva.Line, line);
 	      });
 	
-	      var rows = _immutable2.default.Range(0, this.props.rows).map(function (row) {
+	      var rows = _immutable2.default.Range(0, this.props.rows + 1).map(function (row) {
 	        var y = row * _this2.props.cell;
 	
 	        var line = {

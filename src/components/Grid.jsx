@@ -5,7 +5,7 @@ import {Line, Group} from 'react-konva';
 
 export default class Grid extends React.Component {
   render() {
-    const columns = Immutable.Range(0, this.props.columns).map((column) => {
+    const columns = Immutable.Range(0, this.props.columns + 1).map((column) => {
       const x = column * this.props.cell;
 
       const line = {
@@ -17,7 +17,7 @@ export default class Grid extends React.Component {
       return (<Line {...line}></Line>)
     });
 
-    const rows = Immutable.Range(0, this.props.rows).map((row) => {
+    const rows = Immutable.Range(0, this.props.rows + 1).map((row) => {
       const y = row * this.props.cell;
 
       const line = {

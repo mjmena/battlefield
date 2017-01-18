@@ -5,17 +5,20 @@ import ReactDOM from 'react-dom';
 import {Entity} from './Records';
 import EntityList from './components/EntityList';
 import Battlefield from './components/Battlefield';
-import {Layer, Rect, Stage, Group} from 'react-konva';
 const socket = io();
 
 let entities = Immutable.Map();
 let current_entity_id = -1;
-document.getElementById('create_character').addEventListener('click', (event) => {
-	socket.emit('create_character')
-});
+
+let cell = 50;
 
 function update(){
-	ReactDOM.render(<App entities={entities.toList()} current_entity_id={current_entity_id} handleSelectClick={handleSelectClick}></App>, document.getElementById('root'));
+	ReactDOM.render(<App
+		entities={entities.toList()}
+		current_entity_id={current_entity_id}
+		handleSelectClick={handleSelectClick}
+		handleDragEnd={handleDragEnd}
+		></App>, document.getElementById('root'));
 }
 
 socket.on('update_entities', function(updated_entities){
@@ -35,6 +38,13 @@ const handleSelectClick = (entity_id, event) => {
 	console.log("select by click")
 	current_entity_id = entity_id;
 	update();
+}
+
+const handleDragEnd = (entity, event) => {
+	socket.emit('move_entity_exact', entity.move_exact({
+			x: Math.ceil(event.target.x() / cell),
+			y: Math.ceil(event.target.y() / cell)
+		}));
 }
 
 document.addEventListener("keydown", (event) => {
@@ -70,14 +80,23 @@ class App extends React.Component {
 		const entity_list = this.props.entities.toList();
 		return (
 			<div>
-				<div>
+				<div style={{float:'left', width:500}}>
+						<button onClick={(event)=>socket.emit('create_character')}>Add Entity</button>
 						<EntityList entities={entity_list} current_entity_id={this.props.current_entity_id} handleSelectClick={this.props.handleSelectClick}></EntityList>
 				</div>
-				<Stage width={700} height={700}>
-					<Layer>
-						<Battlefield entities={entity_list} current_entity_id={this.props.current_entity_id} columns={15} rows={15} cell={50} handleSelectClick={this.props.handleSelectClick}></Battlefield>
-					</Layer>
-				</Stage>
+`			`				<div style={{float:'left'}}>
+					<Battlefield
+						entities={entity_list}
+						current_entity_id={this.props.current_entity_id}
+						columns={20}
+						rows={15}
+						cell={cell}
+						handleSelectClick={this.props.handleSelectClick}
+						handleDragEnd={this.props.handleDragEnd}
+					></Battlefield>
+				</div>
+
+
     	</div>
 		)
 	}
