@@ -35246,7 +35246,7 @@
 	
 	var EntityRecord = Immutable.Record({
 	  id: undefined,
-	  position: new TransformRecord()
+	  transform: new TransformRecord()
 	});
 	
 	var Entity = function (_EntityRecord) {
@@ -35255,20 +35255,19 @@
 	  function Entity(entity) {
 	    _classCallCheck(this, Entity);
 	
-	    return _possibleConstructorReturn(this, (Entity.__proto__ || Object.getPrototypeOf(Entity)).call(this, { id: entity.id, position: new TransformRecord(entity.position) }));
+	    return _possibleConstructorReturn(this, (Entity.__proto__ || Object.getPrototypeOf(Entity)).call(this, { id: entity.id, transform: new TransformRecord(entity.transform) }));
 	  }
 	
 	  _createClass(Entity, [{
 	    key: 'move',
-	    value: function move(delta_position) {
-	      var entity = this.set('position', new TransformRecord({ x: delta_position.x + this.position.x, y: delta_position.y + this.position.y }));
-	      console.log(entity.toJS());
+	    value: function move(delta_transform) {
+	      var entity = this.set('transform', new TransformRecord({ x: delta_transform.x + this.transform.x, y: delta_transform.y + this.transform.y }));
 	      return entity;
 	    }
 	  }, {
 	    key: 'get_transform_entity',
 	    value: function get_transform_entity(delta_x, delta_y) {
-	      return this.set('position', new TransformRecord({ x: delta_x, y: delta_y }));
+	      return this.set('transform', new TransformRecord({ x: delta_x, y: delta_y }));
 	    }
 	  }]);
 	

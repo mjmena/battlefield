@@ -26,7 +26,7 @@ io.on('connection', function(socket){
   });
 
 	socket.on('move_entity', function(entity){
-		characters = characters.set(entity.id, characters.get(entity.id).move(entity.position));
+		characters = characters.set(entity.id, characters.get(entity.id).move(entity.transform));
   	io.emit('update_entities', characters);
 	});
 });
@@ -46,5 +46,5 @@ function create_character(x,y){
 		id = characters.last().id + 1;
 	}
 
-	return new Entity({id: id, position: {x: x, y: y}});
+	return new Entity({id: id, transform: {x: x, y: y}});
 }
