@@ -10,7 +10,7 @@ var io = require('socket.io')(http);
 var Immutable = require('immutable');
 var Records = require('./src/Records.js');
 var Entity = Records.Entity;
-var characters = new Immutable.Map();
+var characters = new Immutable.OrderedMap();
 
 app.get("/", function (req, res) {
   res.sendFile(path.join(publicDir, "/index.html"));
@@ -45,6 +45,8 @@ function create_character(x,y){
 	if(characters.size > 0){
 		id = characters.last().id + 1;
 	}
+
+  console.log(id);
 
 	return new Entity({id: id, transform: {x: x, y: y}});
 }

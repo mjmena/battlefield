@@ -2,14 +2,13 @@ var Immutable = require('immutable');
 
 var TransformRecord = Immutable.Record({
   x: 0,
-  y: 0,
-  direction: 0
+  y: 0
 });
 
 var EntityRecord = Immutable.Record({
   id: undefined,
   transform: new TransformRecord()
-})
+});
 
 class Entity extends EntityRecord{
 	constructor(entity){
