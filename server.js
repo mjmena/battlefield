@@ -8,7 +8,8 @@ var path = require('path');
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var Immutable = require('immutable');
-
+var Records = require('./src/Records.js');
+var Entity = Records.Entity;
 var characters = new Immutable.Map();
 
 app.get("/", function (req, res) {
@@ -16,19 +17,17 @@ app.get("/", function (req, res) {
 });
 
 io.on('connection', function(socket){
-	socket.emit('create_battlefield', characters.toList());
+	socket.emit('update_entities', characters);
 
-  	socket.on('create_character', function(){
-  		var character = create_character(10,10);
-  		characters = characters.set(character.id, character);
-  		io.emit('create_character', character);
-  		console.log(characters.toList().toJS())
-	});
+	socket.on('create_character', function(){
+    var character = create_character(10,10);
+    characters = characters.set(character.id, character);
+		io.emit('update_entities', characters);
+  });
 
-	socket.on('move_character', function(moved_character){
-		console.log(moved_character);
-		characters = characters.set(moved_character.id, moved_character);
-  		io.emit('move_character', moved_character);
+	socket.on('move_entity', function(entity){
+		characters = characters.set(entity.id, characters.get(entity.id).move(entity.position));
+  	io.emit('update_entities', characters);
 	});
 });
 
@@ -46,6 +45,6 @@ function create_character(x,y){
 	if(characters.size > 0){
 		id = characters.last().id + 1;
 	}
-	
-	return {id: id, location: {x: x, y: y}};
+
+	return new Entity({id: id, position: {x: x, y: y}});
 }

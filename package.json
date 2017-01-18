@@ -4,18 +4,27 @@
   "description": "D&D Battlefield",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "watch-js": "webpack --watch",
+    "start-dev-server": "node server.js",
+    "start": "npm-run-all -p watch-js start-dev-server"
   },
   "author": "Martin Mena",
   "license": "ISC",
   "devDependencies": {
-    "@types/socket.io-client": "^1.4.29",
-    "awesome-typescript-loader": "^3.0.0-beta.17",
-    "typescript": "^2.1.4"
+    "babel-core": "^6.21.0",
+    "babel-loader": "^6.2.10",
+    "babel-plugin-transform-react-jsx": "^6.8.0",
+    "babel-preset-env": "^1.1.8",
+    "babel-preset-react": "^6.16.0",
+    "concurrently": "^3.1.0",
+    "npm-run-all": "^4.0.1",
+    "source-map-loader": "^0.1.6"
   },
   "dependencies": {
     "express": "^4.14.0",
     "immutable": "^3.8.1",
+    "react": "^15.4.2",
+    "react-dom": "^15.4.2",
     "socket.io": "^1.7.2",
     "socket.io-client": "^1.7.2"
   }
