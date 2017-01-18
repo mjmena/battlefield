@@ -95,11 +95,10 @@
 	});
 	
 	function update() {
-		_reactDom2.default.render(_react2.default.createElement(App, { entities: entities.toList(), current_entity_id: current_entity_id }), document.getElementById('root'));
+		_reactDom2.default.render(_react2.default.createElement(App, { entities: entities.toList(), current_entity_id: current_entity_id, handleSelectClick: handleSelectClick }), document.getElementById('root'));
 	}
 	
 	socket.on('update_entities', function (updated_entities) {
-		console.log(updated_entities);
 		entities = Immutable.fromJS(updated_entities, function (key, value) {
 			if (/^[0-9]+$/.test(key)) {
 				return new _Records.Entity(value.toJS());
@@ -110,11 +109,15 @@
 		if (entities.size > 0 && current_entity_id < 0) {
 			current_entity_id = 0;
 		}
-	
-		_reactDom2.default.render(_react2.default.createElement(App, { entities: entities.toList(), current_entity_id: current_entity_id }), document.getElementById('root'));
+		update();
 	});
+	var handleSelectClick = function handleSelectClick(entity_id, event) {
+		console.log("select by click");
+		current_entity_id = entity_id;
+		update();
+	};
 	
-	document.addEventListener("keyup", function (event) {
+	document.addEventListener("keydown", function (event) {
 		if (current_entity_id >= 0) {
 			if (event.key === 'Tab') {
 				event.preventDefault();
@@ -138,11 +141,7 @@
 				socket.emit('move_entity', entities.get(current_entity_id).get_transform_entity(0, 1));
 			}
 		}
-		_reactDom2.default.render(_react2.default.createElement(App, { entities: entities.toList(), current_entity_id: current_entity_id }), document.getElementById('root'));
-	});
-	
-	document.addEventListener('onload', function () {
-		_reactDom2.default.render(_react2.default.createElement(App, { entities: entities.toList() }), document.getElementById('root'));
+		update();
 	});
 	
 	var App = function (_React$Component) {
@@ -164,7 +163,7 @@
 					_react2.default.createElement(
 						'div',
 						null,
-						_react2.default.createElement(_EntityList2.default, { entities: entity_list, current_entity_id: this.props.current_entity_id })
+						_react2.default.createElement(_EntityList2.default, { entities: entity_list, current_entity_id: this.props.current_entity_id, handleSelectClick: this.props.handleSelectClick })
 					),
 					_react2.default.createElement(
 						_reactKonva.Stage,
@@ -172,7 +171,7 @@
 						_react2.default.createElement(
 							_reactKonva.Layer,
 							null,
-							_react2.default.createElement(_Battlefield2.default, null)
+							_react2.default.createElement(_Battlefield2.default, { entities: entity_list, current_entity_id: this.props.current_entity_id, columns: 15, rows: 15, cell: 50, handleSelectClick: this.props.handleSelectClick })
 						)
 					)
 				);
@@ -35385,7 +35384,7 @@
 	        'div',
 	        null,
 	        this.props.entities.map(function (entity) {
-	          return _react2.default.createElement(_Entity2.default, { key: entity.id, entity: entity, isSelected: _this2.props.current_entity_id === entity.id });
+	          return _react2.default.createElement(_Entity2.default, { key: entity.id, entity: entity, isSelected: _this2.props.current_entity_id === entity.id, handleSelectClick: _this2.props.handleSelectClick });
 	        })
 	      );
 	    }
@@ -35438,7 +35437,7 @@
 			value: function render() {
 				return _react2.default.createElement(
 					'div',
-					{ style: this.props.isSelected ? { fontWeight: 'bold' } : {} },
+					{ style: this.props.isSelected ? { fontWeight: 'bold' } : {}, onClick: this.props.handleSelectClick.bind(this, this.props.entity.id) },
 					JSON.stringify(this.props.entity)
 				);
 			}
@@ -35459,13 +35458,23 @@
 	  value: true
 	});
 	
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
 	var _react = __webpack_require__(56);
 	
 	var _react2 = _interopRequireDefault(_react);
 	
+	var _immutable = __webpack_require__(55);
+	
+	var _immutable2 = _interopRequireDefault(_immutable);
+	
 	var _reactKonva = __webpack_require__(236);
+	
+	var _Grid = __webpack_require__(240);
+	
+	var _Grid2 = _interopRequireDefault(_Grid);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -35479,42 +35488,35 @@
 	  _inherits(Battlefield, _React$Component);
 	
 	  function Battlefield() {
-	    var _ref;
-	
 	    _classCallCheck(this, Battlefield);
 	
-	    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-	      args[_key] = arguments[_key];
-	    }
-	
-	    var _this = _possibleConstructorReturn(this, (_ref = Battlefield.__proto__ || Object.getPrototypeOf(Battlefield)).call.apply(_ref, [this].concat(args)));
-	
-	    _this.state = {
-	      color: 'green'
-	    };
-	    _this.handleClick = _this.handleClick.bind(_this);
-	    return _this;
+	    return _possibleConstructorReturn(this, (Battlefield.__proto__ || Object.getPrototypeOf(Battlefield)).apply(this, arguments));
 	  }
 	
 	  _createClass(Battlefield, [{
-	    key: 'handleClick',
-	    value: function handleClick() {
-	      this.setState({
-	        color: Konva.Util.getRandomColor()
-	      });
-	    }
-	  }, {
 	    key: 'render',
 	    value: function render() {
-	      return _react2.default.createElement(_reactKonva.Rect, {
-	        x: 10,
-	        y: 10,
-	        width: 50,
-	        height: 50,
-	        fill: this.state.color,
-	        shadowBlur: 10,
-	        onClick: this.handleClick
+	      var _this2 = this;
+	
+	      var entities = this.props.entities.map(function (entity) {
+	        var circle = {
+	          key: entity.id,
+	          x: entity.transform.x * _this2.props.cell - _this2.props.cell / 2,
+	          y: entity.transform.y * _this2.props.cell - _this2.props.cell / 2,
+	          radius: _this2.props.cell / 2 - 2,
+	          fill: 'red',
+	          stroke: _this2.props.current_entity_id === entity.id ? 'green' : '',
+	          strokeWidth: 4
+	        };
+	        return _react2.default.createElement(_reactKonva.Circle, _extends({}, circle, { onClick: _this2.props.handleSelectClick.bind(_this2, entity.id) }));
 	      });
+	
+	      return _react2.default.createElement(
+	        _reactKonva.Group,
+	        null,
+	        entities,
+	        _react2.default.createElement(_Grid2.default, { columns: this.props.columns, rows: this.props.rows, cell: this.props.cell })
+	      );
 	    }
 	  }]);
 	
@@ -52593,6 +52595,88 @@
 /***/ function(module, exports) {
 
 	/* (ignored) */
+
+/***/ },
+/* 240 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _react = __webpack_require__(56);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _immutable = __webpack_require__(55);
+	
+	var _immutable2 = _interopRequireDefault(_immutable);
+	
+	var _reactKonva = __webpack_require__(236);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var Grid = function (_React$Component) {
+	  _inherits(Grid, _React$Component);
+	
+	  function Grid() {
+	    _classCallCheck(this, Grid);
+	
+	    return _possibleConstructorReturn(this, (Grid.__proto__ || Object.getPrototypeOf(Grid)).apply(this, arguments));
+	  }
+	
+	  _createClass(Grid, [{
+	    key: 'render',
+	    value: function render() {
+	      var _this2 = this;
+	
+	      var columns = _immutable2.default.Range(0, this.props.columns).map(function (column) {
+	        var x = column * _this2.props.cell;
+	
+	        var line = {
+	          key: column,
+	          points: [x, 0, x, _this2.props.rows * _this2.props.cell],
+	          stroke: 'grey',
+	          strokeWidth: 1
+	        };
+	        return _react2.default.createElement(_reactKonva.Line, line);
+	      });
+	
+	      var rows = _immutable2.default.Range(0, this.props.rows).map(function (row) {
+	        var y = row * _this2.props.cell;
+	
+	        var line = {
+	          key: row,
+	          points: [0, y, _this2.props.columns * _this2.props.cell, y],
+	          stroke: 'grey',
+	          strokeWidth: 1
+	        };
+	        return _react2.default.createElement(_reactKonva.Line, line);
+	      });
+	
+	      return _react2.default.createElement(
+	        _reactKonva.Group,
+	        null,
+	        columns,
+	        rows
+	      );
+	    }
+	  }]);
+	
+	  return Grid;
+	}(_react2.default.Component);
+	
+	exports.default = Grid;
 
 /***/ }
 /******/ ]);

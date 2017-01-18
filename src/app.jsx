@@ -14,14 +14,11 @@ document.getElementById('create_character').addEventListener('click', (event) =>
 	socket.emit('create_character')
 });
 
-
-
 function update(){
-	ReactDOM.render(<App entities={entities.toList()} current_entity_id={current_entity_id}></App>, document.getElementById('root'));
+	ReactDOM.render(<App entities={entities.toList()} current_entity_id={current_entity_id} handleSelectClick={handleSelectClick}></App>, document.getElementById('root'));
 }
 
 socket.on('update_entities', function(updated_entities){
-	console.log(updated_entities)
 	entities = Immutable.fromJS(updated_entities, (key, value) => {
 		if(/^[0-9]+$/.test(key)){
 				return new Entity(value.toJS());
@@ -32,11 +29,15 @@ socket.on('update_entities', function(updated_entities){
 	if(entities.size > 0 && current_entity_id < 0){
 		current_entity_id = 0;
 	}
-
-	ReactDOM.render(<App entities={entities.toList()} current_entity_id={current_entity_id}></App>, document.getElementById('root'));
+	update();
 });
+const handleSelectClick = (entity_id, event) => {
+	console.log("select by click")
+	current_entity_id = entity_id;
+	update();
+}
 
-document.addEventListener("keyup", (event) => {
+document.addEventListener("keydown", (event) => {
 	if(current_entity_id >= 0){
 		if(event.key === 'Tab'){
 			event.preventDefault();
@@ -60,13 +61,9 @@ document.addEventListener("keyup", (event) => {
 				socket.emit('move_entity', entities.get(current_entity_id).get_transform_entity(0,1));
 		}
 	}
-	ReactDOM.render(<App entities={entities.toList()} current_entity_id={current_entity_id}></App>, document.getElementById('root'));
-});
+	update();
 
-document.addEventListener('onload', () =>{
-	ReactDOM.render(<App entities={entities.toList()}></App>, document.getElementById('root'));
 });
-
 
 class App extends React.Component {
 	render(){
@@ -74,14 +71,13 @@ class App extends React.Component {
 		return (
 			<div>
 				<div>
-						<EntityList entities={entity_list} current_entity_id={this.props.current_entity_id}></EntityList>
+						<EntityList entities={entity_list} current_entity_id={this.props.current_entity_id} handleSelectClick={this.props.handleSelectClick}></EntityList>
 				</div>
-
 				<Stage width={700} height={700}>
-	      	<Layer>
-	            <Battlefield></Battlefield>
-	        </Layer>
-	      </Stage>
+					<Layer>
+						<Battlefield entities={entity_list} current_entity_id={this.props.current_entity_id} columns={15} rows={15} cell={50} handleSelectClick={this.props.handleSelectClick}></Battlefield>
+					</Layer>
+				</Stage>
     	</div>
 		)
 	}
