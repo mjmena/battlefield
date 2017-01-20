@@ -46,8 +46,6 @@
 
 	'use strict';
 	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
 	var _socket = __webpack_require__(1);
 	
 	var _socket2 = _interopRequireDefault(_socket);
@@ -66,38 +64,55 @@
 	
 	var _Records = __webpack_require__(232);
 	
-	var _EntityList = __webpack_require__(233);
+	var _Enums = __webpack_require__(233);
+	
+	var _EntityList = __webpack_require__(234);
 	
 	var _EntityList2 = _interopRequireDefault(_EntityList);
 	
-	var _Battlefield = __webpack_require__(235);
+	var _App = __webpack_require__(236);
 	
-	var _Battlefield2 = _interopRequireDefault(_Battlefield);
+	var _App2 = _interopRequireDefault(_App);
 	
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-	
 	var socket = (0, _socket2.default)();
 	
+	var measuring = false;
 	var entities = Immutable.Map();
 	var current_entity_id = -1;
-	
+	var current = {
+		tool: _Enums.Tool.SELECT,
+		measurement: new _Records.Measurement(0, 0)
+	};
+	var columns = 20;
+	var rows = 15;
 	var cell = 50;
 	
 	function update() {
-		_reactDom2.default.render(_react2.default.createElement(App, {
-			entities: entities.toList(),
-			current_entity_id: current_entity_id,
-			handleSelectClick: handleSelectClick,
-			handleDragEnd: handleDragEnd
-		}), document.getElementById('root'));
+		_reactDom2.default.render(_react2.default.createElement(
+			'div',
+			null,
+			_react2.default.createElement(_App2.default, {
+				entities: entities.toList(),
+				current_entity_id: current_entity_id,
+				current: current,
+				columns: columns,
+				rows: rows,
+				cell: cell,
+				handleSelectClick: handleSelectClick,
+				handleDragEnd: handleDragEnd,
+				rulerEvents: rulerEvents }),
+			_react2.default.createElement(
+				'button',
+				{ onClick: function onClick(event) {
+						return socket.emit('create_character');
+					} },
+				'Add Entity'
+			)
+		), document.getElementById('root'));
 	}
 	
 	socket.on('update_entities', function (updated_entities) {
@@ -113,21 +128,52 @@
 		}
 		update();
 	});
-	var handleSelectClick = function handleSelectClick(entity_id, event) {
-		console.log("select by click");
-		current_entity_id = entity_id;
-		update();
+	
+	var handleSelectClick = function handleSelectClick(entity_id) {
+		if (current.tool === _Enums.Tool.SELECT) {
+			current_entity_id = entity_id;
+			update();
+		}
 	};
 	
 	var handleDragEnd = function handleDragEnd(entity, event) {
-		socket.emit('move_entity_exact', entity.move_exact({
-			x: Math.ceil(event.target.x() / cell),
-			y: Math.ceil(event.target.y() / cell)
-		}));
+		if (current.tool === _Enums.Tool.SELECT) {
+			socket.emit('move_entity_exact', entity.move_exact({
+				x: Math.ceil(event.target.x() / cell),
+				y: Math.ceil(event.target.y() / cell)
+			}));
+		}
 	};
 	
-	document.addEventListener("keydown", function (event) {
+	var rulerEvents = {
+		start: function start(event) {
+			if (current.tool === _Enums.Tool.RULER) {
+				measuring = true;
+				var x = Math.ceil(event.target.x() / cell) + 1;
+				var y = Math.ceil(event.target.y() / cell) + 1;
+				current.measurement = new _Records.Measurement(x, y, x, y);
+				update();
+			}
+		},
+		move: function move(event) {
+			if (current.tool === _Enums.Tool.RULER && measuring) {
+				var newMeasurement = current.measurement.to(Math.ceil(event.target.x() / cell) + 1, Math.ceil(event.target.y() / cell) + 1);
+				if (!Immutable.is(current.measurement, newMeasurement)) {
+					current.measurement = newMeasurement;
+					update();
+				}
+			}
+		},
+		stop: function stop(event) {
+			measuring = false;
+			current.measurement = new _Records.Measurement(0, 0, 0, 0);
+			update();
+		}
+	};
+	
+	document.addEventListener('keydown', function (event) {
 		if (current_entity_id >= 0) {
+			var selected_entity = entities.get(current_entity_id);
 			if (event.key === 'Tab') {
 				event.preventDefault();
 				if (entities.size > 1) {
@@ -138,69 +184,35 @@
 				}
 			} else if (event.key === 'ArrowRight') {
 				event.preventDefault();
-				socket.emit('move_entity', entities.get(current_entity_id).get_transform_entity(1, 0));
+				if (selected_entity.transform.x < columns) {
+					socket.emit('move_entity', entities.get(current_entity_id).get_transform_entity(1, 0));
+				}
 			} else if (event.key === 'ArrowLeft') {
 				event.preventDefault();
-				socket.emit('move_entity', entities.get(current_entity_id).get_transform_entity(-1, 0));
+				if (selected_entity.transform.x > 1) {
+					socket.emit('move_entity', entities.get(current_entity_id).get_transform_entity(-1, 0));
+				}
 			} else if (event.key === 'ArrowUp') {
 				event.preventDefault();
-				socket.emit('move_entity', entities.get(current_entity_id).get_transform_entity(0, -1));
+				if (selected_entity.transform.y > 1) {
+					socket.emit('move_entity', entities.get(current_entity_id).get_transform_entity(0, -1));
+				}
 			} else if (event.key === 'ArrowDown') {
 				event.preventDefault();
-				socket.emit('move_entity', entities.get(current_entity_id).get_transform_entity(0, 1));
+				if (selected_entity.transform.y < rows) {
+					socket.emit('move_entity', entities.get(current_entity_id).get_transform_entity(0, 1));
+				}
 			}
 		}
+		if (event.key === '1') {
+			current.tool = _Enums.Tool.SELECT;
+		}
+		if (event.key === '2') {
+			current.tool = _Enums.Tool.RULER;
+		}
+	
 		update();
 	});
-	
-	var App = function (_React$Component) {
-		_inherits(App, _React$Component);
-	
-		function App() {
-			_classCallCheck(this, App);
-	
-			return _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).apply(this, arguments));
-		}
-	
-		_createClass(App, [{
-			key: 'render',
-			value: function render() {
-				var entity_list = this.props.entities.toList();
-				return _react2.default.createElement(
-					'div',
-					null,
-					_react2.default.createElement(
-						'div',
-						{ style: { float: 'left', width: 500 } },
-						_react2.default.createElement(
-							'button',
-							{ onClick: function onClick(event) {
-									return socket.emit('create_character');
-								} },
-							'Add Entity'
-						),
-						_react2.default.createElement(_EntityList2.default, { entities: entity_list, current_entity_id: this.props.current_entity_id, handleSelectClick: this.props.handleSelectClick })
-					),
-					'`   `    ',
-					_react2.default.createElement(
-						'div',
-						{ style: { float: 'left' } },
-						_react2.default.createElement(_Battlefield2.default, {
-							entities: entity_list,
-							current_entity_id: this.props.current_entity_id,
-							columns: 20,
-							rows: 15,
-							cell: cell,
-							handleSelectClick: this.props.handleSelectClick,
-							handleDragEnd: this.props.handleDragEnd
-						})
-					)
-				);
-			}
-		}]);
-	
-		return App;
-	}(_react2.default.Component);
 
 /***/ },
 /* 1 */
@@ -35324,6 +35336,53 @@
 	  transform: new TransformRecord()
 	});
 	
+	var MeasurementRecord = Immutable.Record({
+	  start: new TransformRecord(),
+	  end: new TransformRecord()
+	});
+	
+	var Measurement = function (_MeasurementRecord) {
+	  _inherits(Measurement, _MeasurementRecord);
+	
+	  function Measurement(startx, starty, endx, endy) {
+	    _classCallCheck(this, Measurement);
+	
+	    return _possibleConstructorReturn(this, (Measurement.__proto__ || Object.getPrototypeOf(Measurement)).call(this, { start: new TransformRecord({ x: startx, y: starty }), end: new TransformRecord({ x: endx, y: endy }) }));
+	  }
+	
+	  _createClass(Measurement, [{
+	    key: 'to',
+	    value: function to(x, y) {
+	      return this.set('end', new TransformRecord({ x: x, y: y }));
+	    }
+	  }, {
+	    key: 'asPointList',
+	    value: function asPointList() {
+	      return Immutable.List([this.start.x, this.start.y, this.end.x, this.end.y]);
+	    }
+	  }, {
+	    key: 'getEuclideanDistance',
+	    value: function getEuclideanDistance() {
+	      var delta = {
+	        x: Math.abs(this.start.x - this.end.x),
+	        y: Math.abs(this.start.y - this.end.y)
+	      };
+	      return Math.sqrt(delta.x * delta.x + delta.y * delta.y);
+	    }
+	  }, {
+	    key: 'getOneTwoDistance',
+	    value: function getOneTwoDistance() {
+	      var delta = {
+	        x: Math.abs(this.start.x - this.end.x),
+	        y: Math.abs(this.start.y - this.end.y)
+	      };
+	      return Math.floor(Math.max(delta.x, delta.y) + Math.floor(Math.min(delta.x, delta.y)) / 2);
+	    }
+	  }]);
+	
+	  return Measurement;
+	}(MeasurementRecord);
+	
 	var Entity = function (_EntityRecord) {
 	  _inherits(Entity, _EntityRecord);
 	
@@ -35357,17 +35416,32 @@
 	module.exports = {
 	  TransformRecord: TransformRecord,
 	  EntityRecord: EntityRecord,
-	  Entity: Entity
+	  Entity: Entity,
+	  Measurement: Measurement
 	};
 
 /***/ },
 /* 233 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	var Tool = exports.Tool = {
+		SELECT: 'Select',
+		RULER: 'Ruler'
+	};
+
+/***/ },
+/* 234 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
-	  value: true
+		value: true
 	});
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -35376,7 +35450,7 @@
 	
 	var _react2 = _interopRequireDefault(_react);
 	
-	var _Entity = __webpack_require__(234);
+	var _Entity = __webpack_require__(235);
 	
 	var _Entity2 = _interopRequireDefault(_Entity);
 	
@@ -35393,36 +35467,36 @@
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
 	var EntityList = function (_React$Component) {
-	  _inherits(EntityList, _React$Component);
+		_inherits(EntityList, _React$Component);
 	
-	  function EntityList() {
-	    _classCallCheck(this, EntityList);
+		function EntityList() {
+			_classCallCheck(this, EntityList);
 	
-	    return _possibleConstructorReturn(this, (EntityList.__proto__ || Object.getPrototypeOf(EntityList)).apply(this, arguments));
-	  }
+			return _possibleConstructorReturn(this, (EntityList.__proto__ || Object.getPrototypeOf(EntityList)).apply(this, arguments));
+		}
 	
-	  _createClass(EntityList, [{
-	    key: 'render',
-	    value: function render() {
-	      var _this2 = this;
+		_createClass(EntityList, [{
+			key: 'render',
+			value: function render() {
+				var _this2 = this;
 	
-	      return _react2.default.createElement(
-	        'div',
-	        null,
-	        this.props.entities.map(function (entity) {
-	          return _react2.default.createElement(_Entity2.default, { key: entity.id, entity: entity, isSelected: _this2.props.current_entity_id === entity.id, handleSelectClick: _this2.props.handleSelectClick });
-	        })
-	      );
-	    }
-	  }]);
+				return _react2.default.createElement(
+					'div',
+					null,
+					this.props.entities.map(function (entity) {
+						return _react2.default.createElement(_Entity2.default, { key: entity.id, entity: entity, isSelected: _this2.props.current_entity_id === entity.id, handleSelectClick: _this2.props.handleSelectClick });
+					})
+				);
+			}
+		}]);
 	
-	  return EntityList;
+		return EntityList;
 	}(_react2.default.Component);
 	
 	exports.default = EntityList;
 
 /***/ },
-/* 234 */
+/* 235 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -35463,8 +35537,11 @@
 			value: function render() {
 				return _react2.default.createElement(
 					'div',
-					{ style: this.props.isSelected ? { fontWeight: 'bold' } : {}, onClick: this.props.handleSelectClick.bind(this, this.props.entity.id) },
-					JSON.stringify(this.props.entity)
+					{
+						style: this.props.isSelected ? { textDecoration: "underline overline" } : {},
+						onClick: this.props.handleSelectClick.bind(this, this.props.entity.id)
+					},
+					JSON.stringify(this.props.entity, undefined, 2)
 				);
 			}
 		}]);
@@ -35475,7 +35552,89 @@
 	exports.default = Entity;
 
 /***/ },
-/* 235 */
+/* 236 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _react = __webpack_require__(56);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _EntityList = __webpack_require__(234);
+	
+	var _EntityList2 = _interopRequireDefault(_EntityList);
+	
+	var _Battlefield = __webpack_require__(237);
+	
+	var _Battlefield2 = _interopRequireDefault(_Battlefield);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var App = function (_React$Component) {
+		_inherits(App, _React$Component);
+	
+		function App() {
+			_classCallCheck(this, App);
+	
+			return _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).apply(this, arguments));
+		}
+	
+		_createClass(App, [{
+			key: 'render',
+			value: function render() {
+				var entity_list = this.props.entities.toList();
+				return _react2.default.createElement(
+					'div',
+					null,
+					_react2.default.createElement(
+						'div',
+						{ style: { float: 'left', paddingRight: 20 } },
+						_react2.default.createElement(
+							'pre',
+							null,
+							JSON.stringify(this.props.current, undefined, "\t")
+						),
+						_react2.default.createElement(_EntityList2.default, { entities: entity_list, current_entity_id: this.props.current_entity_id, handleSelectClick: this.props.handleSelectClick })
+					),
+					_react2.default.createElement(
+						'div',
+						{ style: { float: "left" } },
+						_react2.default.createElement(_Battlefield2.default, {
+							entities: entity_list,
+							current_entity_id: this.props.current_entity_id,
+							columns: this.props.columns,
+							rows: this.props.rows,
+							cell: this.props.cell,
+							handleSelectClick: this.props.handleSelectClick,
+							handleDragEnd: this.props.handleDragEnd,
+							rulerEvents: this.props.rulerEvents,
+							current: this.props.current
+						})
+					)
+				);
+			}
+		}]);
+	
+		return App;
+	}(_react2.default.Component);
+	
+	exports.default = App;
+
+/***/ },
+/* 237 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -35496,11 +35655,17 @@
 	
 	var _immutable2 = _interopRequireDefault(_immutable);
 	
-	var _reactKonva = __webpack_require__(236);
+	var _reactKonva = __webpack_require__(238);
 	
-	var _Grid = __webpack_require__(240);
+	var _Grid = __webpack_require__(242);
 	
 	var _Grid2 = _interopRequireDefault(_Grid);
+	
+	var _DistanceGrid = __webpack_require__(243);
+	
+	var _DistanceGrid2 = _interopRequireDefault(_DistanceGrid);
+	
+	var _Enums = __webpack_require__(233);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -35524,37 +35689,92 @@
 	    value: function render() {
 	      var _this2 = this;
 	
+	      var cell = this.props.cell;
 	      var entities = this.props.entities.map(function (entity) {
-	        var cell = _this2.props.cell;
 	        var circle = {
 	          key: entity.id,
-	          x: entity.transform.x * _this2.props.cell - _this2.props.cell / 2,
-	          y: entity.transform.y * _this2.props.cell - _this2.props.cell / 2,
+	          x: entity.transform.x * cell - cell / 2,
+	          y: entity.transform.y * cell - cell / 2,
 	          radius: _this2.props.cell / 2 - 2,
 	          fill: 'orange',
 	          stroke: _this2.props.current_entity_id === entity.id ? 'green' : '',
 	          strokeWidth: 4,
-	          draggable: true,
+	          draggable: _this2.props.current.tool === _Enums.Tool.SELECT,
 	          dragBoundFunc: function dragBoundFunc(pos) {
+	            var x = pos.x;
+	            var y = pos.y;
+	
+	            var bounds = {
+	              x: _this2.props.columns * cell - cell / 2,
+	              y: _this2.props.rows * cell - cell / 2
+	            };
+	
+	            if (x < cell / 2) {
+	              x = cell / 2;
+	            } else if (x > bounds.x) {
+	              x = bounds.x;
+	            }
+	
+	            if (y < cell / 2) {
+	              y = cell / 2;
+	            } else if (y > bounds.y) {
+	              y = bounds.y;
+	            }
+	
 	            return {
-	              x: Math.ceil(pos.x / cell) * cell - cell / 2,
-	              y: Math.ceil(pos.y / cell) * cell - cell / 2
+	              x: x,
+	              y: y
 	            };
 	          }
 	        };
-	        return _react2.default.createElement(_reactKonva.Circle, _extends({}, circle, { onClick: _this2.props.handleSelectClick.bind(_this2, entity.id), onDragEnd: _this2.props.handleDragEnd.bind(_this2, entity) }));
+	
+	        return _react2.default.createElement(_reactKonva.Circle, _extends({}, circle, {
+	          onClick: _this2.props.handleSelectClick.bind(_this2, entity.id),
+	          onDragStart: _this2.props.handleSelectClick.bind(_this2, entity.id),
+	          onDragEnd: _this2.props.handleDragEnd.bind(_this2, entity) }));
 	      });
 	
-	      return _react2.default.createElement(
-	        _reactKonva.Stage,
-	        { width: this.props.columns * this.props.cell, height: this.props.rows * this.props.cell },
-	        _react2.default.createElement(
-	          _reactKonva.Layer,
-	          null,
-	          entities,
-	          _react2.default.createElement(_Grid2.default, { columns: this.props.columns, rows: this.props.rows, cell: this.props.cell })
-	        )
-	      );
+	      var grid = _react2.default.createElement(_Grid2.default, { columns: this.props.columns, rows: this.props.rows, cell: this.props.cell, rulerEvents: this.props.rulerEvents });
+	      var measurement = {
+	        points: this.props.current.measurement.asPointList().map(function (point) {
+	          return point * cell - cell / 2;
+	        }).toArray(),
+	        stroke: 'red',
+	        strokeWidth: 5
+	      };
+	
+	      var text = {
+	        x: this.props.current.measurement.end.x * cell - cell / 2,
+	        y: this.props.current.measurement.end.y * cell - cell / 2,
+	        text: this.props.current.measurement.getOneTwoDistance() * 5 + "ft",
+	        fontSize: cell / 4
+	      };
+	
+	      if (this.props.current.tool === _Enums.Tool.SELECT) {
+	        return _react2.default.createElement(
+	          _reactKonva.Stage,
+	          { width: this.props.columns * this.props.cell, height: this.props.rows * this.props.cell },
+	          _react2.default.createElement(
+	            _reactKonva.Layer,
+	            null,
+	            grid,
+	            entities
+	          )
+	        );
+	      } else {
+	        return _react2.default.createElement(
+	          _reactKonva.Stage,
+	          { width: this.props.columns * this.props.cell, height: this.props.rows * this.props.cell },
+	          _react2.default.createElement(
+	            _reactKonva.Layer,
+	            null,
+	            entities,
+	            _react2.default.createElement(_reactKonva.Line, measurement),
+	            _react2.default.createElement(_reactKonva.Text, text),
+	            grid
+	          )
+	        );
+	      }
 	    }
 	  }]);
 	
@@ -35564,13 +35784,13 @@
 	exports.default = Battlefield;
 
 /***/ },
-/* 236 */
+/* 238 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Adapted from ReactART:
 	// https://github.com/reactjs/react-art
 	
-	var Konva = __webpack_require__(237);
+	var Konva = __webpack_require__(239);
 	var React = __webpack_require__(57);
 	
 	var ReactInstanceMap = __webpack_require__(170);
@@ -35974,7 +36194,7 @@
 
 
 /***/ },
-/* 237 */
+/* 239 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {
@@ -36230,8 +36450,8 @@
 	            // Node. Does not work with strict CommonJS, but
 	            // only CommonJS-like enviroments that support module.exports,
 	            // like Node.
-	            var Canvas = __webpack_require__(238);
-	            var jsdom = __webpack_require__(239).jsdom;
+	            var Canvas = __webpack_require__(240);
+	            var jsdom = __webpack_require__(241).jsdom;
 	
 	            Konva.window = jsdom('<!DOCTYPE html><html><head></head><body></body></html>').defaultView;
 	            Konva.document = Konva.window.document;
@@ -52623,19 +52843,19 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 238 */
-/***/ function(module, exports) {
-
-	/* (ignored) */
-
-/***/ },
-/* 239 */
-/***/ function(module, exports) {
-
-	/* (ignored) */
-
-/***/ },
 /* 240 */
+/***/ function(module, exports) {
+
+	/* (ignored) */
+
+/***/ },
+/* 241 */
+/***/ function(module, exports) {
+
+	/* (ignored) */
+
+/***/ },
+/* 242 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -52654,7 +52874,7 @@
 	
 	var _immutable2 = _interopRequireDefault(_immutable);
 	
-	var _reactKonva = __webpack_require__(236);
+	var _reactKonva = __webpack_require__(238);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -52678,35 +52898,32 @@
 	    value: function render() {
 	      var _this2 = this;
 	
-	      var columns = _immutable2.default.Range(0, this.props.columns + 1).map(function (column) {
-	        var x = column * _this2.props.cell;
+	      var columns = _immutable2.default.Range(0, this.props.columns);
+	      var rows = _immutable2.default.Range(0, this.props.rows);
+	      var cell = this.props.cell;
 	
-	        var line = {
-	          key: column,
-	          points: [x, 0, x, _this2.props.rows * _this2.props.cell],
-	          stroke: 'grey',
-	          strokeWidth: 1
-	        };
-	        return _react2.default.createElement(_reactKonva.Line, line);
-	      });
+	      var cells = columns.map(function (column) {
+	        return rows.map(function (row) {
+	          var square = {
+	            key: "(" + (column + 1) + "," + (row + 1) + ")",
+	            x: column * cell,
+	            y: row * cell,
+	            width: cell,
+	            height: cell,
+	            stroke: 'grey',
+	            onMouseDown: _this2.props.rulerEvents.start,
+	            onMouseMove: _this2.props.rulerEvents.move,
+	            onMouseUp: _this2.props.rulerEvents.stop
+	          };
 	
-	      var rows = _immutable2.default.Range(0, this.props.rows + 1).map(function (row) {
-	        var y = row * _this2.props.cell;
-	
-	        var line = {
-	          key: row,
-	          points: [0, y, _this2.props.columns * _this2.props.cell, y],
-	          stroke: 'grey',
-	          strokeWidth: 1
-	        };
-	        return _react2.default.createElement(_reactKonva.Line, line);
-	      });
+	          return _react2.default.createElement(_reactKonva.Rect, square);
+	        });
+	      }).flatten();
 	
 	      return _react2.default.createElement(
 	        _reactKonva.Group,
 	        null,
-	        columns,
-	        rows
+	        cells
 	      );
 	    }
 	  }]);
@@ -52715,6 +52932,84 @@
 	}(_react2.default.Component);
 	
 	exports.default = Grid;
+
+/***/ },
+/* 243 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _react = __webpack_require__(56);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _immutable = __webpack_require__(55);
+	
+	var _immutable2 = _interopRequireDefault(_immutable);
+	
+	var _reactKonva = __webpack_require__(238);
+	
+	var _Records = __webpack_require__(232);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var DistanceGrid = function (_React$Component) {
+	  _inherits(DistanceGrid, _React$Component);
+	
+	  function DistanceGrid() {
+	    _classCallCheck(this, DistanceGrid);
+	
+	    return _possibleConstructorReturn(this, (DistanceGrid.__proto__ || Object.getPrototypeOf(DistanceGrid)).apply(this, arguments));
+	  }
+	
+	  _createClass(DistanceGrid, [{
+	    key: 'render',
+	    value: function render() {
+	      var columns = _immutable2.default.Range(0, this.props.columns);
+	      var rows = _immutable2.default.Range(0, this.props.rows);
+	      var cell = this.props.cell;
+	      var entity = this.props.entity;
+	      var measurement = new _Records.Measurement(entity.transform.x, entity.transform.y, entity.transform.x, entity.transform.y);
+	      console.log("Made it from the bottom");
+	      var cells = columns.map(function (column) {
+	        return rows.map(function (row) {
+	
+	          var text = {
+	            x: column * cell - cell,
+	            y: row * cell - cell,
+	            text: measurement.to(column, row).getOneTwoDistance() * 5 + " ft.",
+	            fontSize: cell / 4
+	
+	          };
+	          return _react2.default.createElement(_reactKonva.Text, text);
+	        });
+	      }).flatten();
+	
+	      console.log("here");
+	      return _react2.default.createElement(
+	        _reactKonva.Group,
+	        null,
+	        cells
+	      );
+	    }
+	  }]);
+	
+	  return DistanceGrid;
+	}(_react2.default.Component);
+	
+	exports.default = DistanceGrid;
 
 /***/ }
 /******/ ]);

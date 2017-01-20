@@ -17,6 +17,7 @@ app.get("/", function (req, res) {
 });
 
 io.on('connection', function(socket){
+	console.log(socket.id);
 	socket.emit('update_entities', characters);
 
 	socket.on('create_character', function(){
@@ -27,12 +28,12 @@ io.on('connection', function(socket){
 
 	socket.on('move_entity', function(entity){
 		characters = characters.set(entity.id, characters.get(entity.id).move(entity.transform));
-  	io.emit('update_entities', characters);
+  		io.emit('update_entities', characters);
 	});
 
-  socket.on('move_entity_exact', function(entity){
-		characters = characters.set(entity.id, entity);
-  	io.emit('update_entities', characters);
+  	socket.on('move_entity_exact', function(entity){
+		characters = characters.set(entity.id, new Entity(entity));
+  		io.emit('update_entities', characters);
 	});
 });
 
@@ -49,8 +50,6 @@ function create_character(x,y){
 	if(characters.size > 0){
 		id = characters.last().id + 1;
 	}
-
-  console.log(id);
 
 	return new Entity({id: id, transform: {x: x, y: y}});
 }

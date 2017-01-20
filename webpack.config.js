@@ -1,6 +1,6 @@
 module.exports = {
     entry: {
-        dm: "./src/app.jsx"
+        dm: "./src/DungeonMasterApp.jsx"
         // player: "./src/player.tsx"
     },
     output: {
