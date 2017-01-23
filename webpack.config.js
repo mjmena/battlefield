@@ -1,7 +1,6 @@
 module.exports = {
     entry: {
-        dm: "./src/DungeonMasterApp.jsx"
-        // player: "./src/player.tsx"
+        player: "./src/PlayerApp.jsx"
     },
     output: {
         filename: "[name].bundle.js",

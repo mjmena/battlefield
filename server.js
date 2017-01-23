@@ -7,34 +7,20 @@ var path = require('path');
 
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-var Immutable = require('immutable');
-var Records = require('./src/Records.js');
-var Entity = Records.Entity;
-var characters = new Immutable.OrderedMap();
+import Immutable from 'immutable';
+
+import {createStore} from 'redux';
+import {getLocalAction} from './src/actions/EntityActions';
+import {ADD_PLAYER, removePlayer} from './src/actions/PlayerActions';
+import {combineReducers} from 'redux-immutable';
+import EntityReducer from './src/reducers/EntityReducer';
+import BattlefieldReducer from './src/reducers/BattlefieldReducer';
+import PlayerReducer from './src/reducers/PlayerReducer';
+
+const players = Immutable.Map();
 
 app.get("/", function (req, res) {
   res.sendFile(path.join(publicDir, "/index.html"));
-});
-
-io.on('connection', function(socket){
-	console.log(socket.id);
-	socket.emit('update_entities', characters);
-
-	socket.on('create_character', function(){
-    var character = create_character(10,10);
-    characters = characters.set(character.id, character);
-		io.emit('update_entities', characters);
-  });
-
-	socket.on('move_entity', function(entity){
-		characters = characters.set(entity.id, characters.get(entity.id).move(entity.transform));
-  		io.emit('update_entities', characters);
-	});
-
-  	socket.on('move_entity_exact', function(entity){
-		characters = characters.set(entity.id, new Entity(entity));
-  		io.emit('update_entities', characters);
-	});
 });
 
 http.listen(80, function(){
@@ -45,11 +31,27 @@ app.use(express.static(publicDir));
 
 console.log("Server showing %s listening at http://%s:%s", publicDir, hostname, port);
 
-function create_character(x,y){
-	var id = 0;
-	if(characters.size > 0){
-		id = characters.last().id + 1;
-	}
+const store = createStore(combineReducers({
+			entities: EntityReducer,
+			grid: BattlefieldReducer,
+			players: PlayerReducer
+		}), Immutable.Map());
 
-	return new Entity({id: id, transform: {x: x, y: y}});
-}
+io.on('connection', function(socket){
+	socket.emit('hydrate', store.getState().toJS());
+
+	socket.on('action', function(action) {
+		store.dispatch(action);
+		if(action.type == ADD_PLAYER){
+			players = players.set(socket.id, action.player);
+		}
+		socket.broadcast.emit("action", getLocalAction(action));
+	});
+
+	socket.on("disconnect", ()=>{
+		const player = players.get(socket.id);
+		store.dispatch(removePlayer(player));
+		io.emit("action", removePlayer(player));
+		players = players.remove(socket.id);
+	});
+});
