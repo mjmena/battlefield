@@ -17,6 +17,7 @@ import EntityList from './containers/EntityList';
 import PlayerList from './containers/PlayerList';
 import Battlefield from './containers/Battlefield';
 import ColorPicker from './containers/ColorPicker';
+import State from './containers/State';
 
 import io from 'socket.io-client';
 import Immutable from 'immutable';
@@ -36,6 +37,7 @@ if(key){
 				<div style={{float:"right", clear:"right"}}>
 					<PlayerList />
 					<ColorPicker />
+					<State />
 				</div>
 				<div style={{float:"left"}}>
 					<EntityList />
@@ -59,7 +61,7 @@ if(key){
 		store.dispatch(addPlayer(key));
 		store.dispatch(updateID(key));
 
-		const unsubscribe = store.subscribe(()=>console.log(JSON.stringify(store.getState().toJS())))
+		// const unsubscribe = store.subscribe(()=>console.log(JSON.stringify(store.getState().toJS())))
 
 		ReactDOM.render(<App />, document.getElementById("root"))
 	});

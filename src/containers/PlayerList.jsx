@@ -2,10 +2,6 @@ import React from 'react';
 import {connect} from 'react-redux';
 
 const PlayerList = ({players, localPlayer}) => {
-	const style = {
-		fontWeight: "bold"
-	}
-
 	return (<div>
       {players.map((player) => {
 		return (<Player key={player.get("id")} player={player} selected={player === localPlayer} />)
