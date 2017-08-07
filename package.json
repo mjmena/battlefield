@@ -8,7 +8,7 @@
     "start-dev-server": "babel-node server.js",
     "start": "npm-run-all -p watch-js start-dev-server"
   },
-  "author": "Martin Mena",
+  "author": ["Martin Mena", "Garrett Sutcliffe"],
   "license": "ISC",
   "devDependencies": {
     "babel-cli": "^6.22.2",
