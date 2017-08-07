@@ -1,6 +1,6 @@
 var express = require("express");
 var app = express();
-var hostname = process.env.HOSTNAME || '10.0.0.109';
+var hostname = process.env.HOSTNAME || 'localhost';
 var port = parseInt(process.env.PORT, 10) || 80;
 var publicDir = process.argv[2] || __dirname + '/dist';
 var path = require('path');
@@ -17,7 +17,7 @@ import EntityReducer from './src/reducers/EntityReducer';
 import BattlefieldReducer from './src/reducers/BattlefieldReducer';
 import PlayerReducer from './src/reducers/PlayerReducer';
 
-const players = Immutable.Map();
+let players = Immutable.Map();
 
 app.get("/", function (req, res) {
   res.sendFile(path.join(publicDir, "/index.html"));
@@ -28,8 +28,6 @@ http.listen(80, function(){
 });
 
 app.use(express.static(publicDir));
-
-console.log("Server showing %s listening at http://%s:%s", publicDir, hostname, port);
 
 const store = createStore(combineReducers({
 			entities: EntityReducer,

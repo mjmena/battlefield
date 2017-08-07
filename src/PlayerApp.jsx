@@ -23,7 +23,7 @@ import Immutable from 'immutable';
 
 import {addPlayer} from './actions/PlayerActions';
 import {updateID} from './actions/LocalActions';
-const store = {};
+let store = {};
 
 const key = Cookies.get('name') 
 if(key){
