@@ -1,52 +1,36 @@
 import React from 'react';
 import {connect} from 'react-redux';
-import {Stage, Layer, Circle} from 'react-konva'
-import Grid from '../components/Grid';
-import {moveEntity} from './../actions/EntityActions';
-import {selectEntity} from './../actions/PlayerActions';
+import Grid from '../components/GridCSS';
+import Entity from '../components/Entity';
 
-const Battlefield = ({entities, players, localPlayerID, columns, rows, cellSize, onMoveEntity, onSelectEntity}) => {
+import {selectEntity, moveEntity} from '../actions/EntityActions';
+
+const Battlefield = ({entities, players, localPlayerID, cellSize, onSelectEntity, onMoveEntity}) => {
+  console.log(entities)
   const drawnEntities = entities.map((entity) => {
 
-    const highlight = players.find( (player)=>{
+    const highlight = players.find((player)=>{
       return player.get("selectedEntityID") === entity.get("id")
     });
-
     const circle = {
       key: entity.get("id"),
-      x: entity.get("transform").get("x") * cellSize - cellSize/2,
-      y: entity.get("transform").get("y") * cellSize - cellSize/2,
-      radius: cellSize/2 - 2,
-      fill: 'orange',
-      stroke: highlight ? highlight.get("selectedColor") : "",
-      strokeWidth: 4,
-      draggable: true,
-      onClick: (event) => {
-        onSelectEntity(localPlayerID, entity.get("id"));
-      },
-      onDragEnd:(event)=>{
-        const x = Math.ceil(event.target.x() / cellSize);
-        const y = Math.ceil(event.target.y() / cellSize); 
-        onMoveEntity(entity.get("id"),x,y) 
-      }
+      entityId: entity.get("id"),
+      playerId: localPlayerID,
+      x: entity.get("transform").get("x") * cellSize - cellSize,
+      y: entity.get("transform").get("y") * cellSize - cellSize,
+      radius: cellSize/2,
+      selected:  highlight ? highlight.get("selectedColor") : "",
+      onSelectEntity: onSelectEntity,
+      onMoveEntity: onMoveEntity
     }
-
-    const text = { 
-      x: entity.get("transform").get("x") * cellSize - cellSize/2,
-      y: entity.get("transform").get("y") * cellSize - cellSize/2,
-      
-    }
-
-    return <Circle {...circle} />
+    return <Entity {...circle}></Entity>
   });
 
   return (
-    <Stage width={columns * cellSize} height={rows * cellSize}>
-      <Layer>
-          <Grid columns={columns} rows={rows} cellSize={cellSize} />
-          {drawnEntities}
-      </Layer>
-    </Stage>
+    <div>
+      <Grid rows={50} columns={50} cellSize={cellSize}></Grid>
+      {drawnEntities}  
+    </div>
   )
 }
 
@@ -58,10 +42,8 @@ const mapStateToProps = (state) => {
     entities: entities,
     players: state.get("players"),
     localPlayerID: playerID,
-    columns: grid.get("columns"),
-    rows: grid.get("rows"),
     cellSize: grid.get("cellSize")
   }
 }
 
-export default connect(mapStateToProps, {onMoveEntity:moveEntity, onSelectEntity:selectEntity})(Battlefield);
+export default connect(mapStateToProps, {onSelectEntity:selectEntity, onMoveEntity: moveEntity})(Battlefield);

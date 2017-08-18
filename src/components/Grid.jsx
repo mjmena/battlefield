@@ -1,26 +1,19 @@
-import React from 'react';
-import Immutable from 'immutable';
-import {Rect, Group} from 'react-konva';
+import React from 'react'
 
-export default ({columns, rows, cellSize}) => {
-  const cells = Immutable.Range(0, columns).map((column) => {
-      return Immutable.Range(0, rows).map((row) => {
-          const square = {
-            key: "(" + (column + 1) + "," + (row + 1) + ")",
-            x: column * cellSize,
-            y: row * cellSize,
-            width: cellSize,
-            height: cellSize,
-            stroke: 'grey',
-          }
-
-          return (<Rect {...square}></Rect>)
-      });
-    }).flatten();
-
-  return(
-    <Group>
-      {cells}
-    </Group>
-  );
+const Grid = ({columns, rows, cellSize}) => {
+	const style = {
+		backgroundSize: cellSize + 'px ' + cellSize +'px',
+		backgroundImage: 'linear-gradient(to right, grey 1px, transparent 1px), linear-gradient(to bottom, grey 1px, transparent 1px)',
+		// width: cellSize * columns + 1,
+		// height: cellSize * rows + 1,
+		width: '100%',
+		height: '100%',
+		margin: 0,
+		padding: 0
+	}
+	return (
+		<div style={style}></div>
+	)
 }
+
+export default Grid;

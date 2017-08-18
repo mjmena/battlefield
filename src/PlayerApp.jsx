@@ -15,7 +15,8 @@ import LocalReducer from './reducers/LocalReducer';
 import Login from './components/Login';
 import EntityList from './containers/EntityList';
 import PlayerList from './containers/PlayerList';
-import Battlefield from './containers/Battlefield';
+import GridCSS from './components/GridCSS';
+import Battlefield from './containers/BattlefieldCSS';
 import ColorPicker from './containers/ColorPicker';
 
 import io from 'socket.io-client';
@@ -26,20 +27,28 @@ import {updateID} from './actions/LocalActions';
 let store = {};
 
 const key = Cookies.get('name') 
+
+const playerPaneStyle = {
+	position:"fixed", 
+	top:0, 
+	right:0, 
+	backgroundColor:"rgba(60,60,60,.2)",
+	borderRadius: 25,
+	padding: 25
+}
+
 if(key){
 	const App = () => {
 		return (<Provider store={store}>
 			<div>
-				<div style={{float:"left"}}>
+				<div style={{vh:'100%', vw:'100%', margin:0, padding:0}}>
 					<Battlefield />
 				</div> 
-				<div style={{float:"right", clear:"right"}}>
+				<div style={playerPaneStyle}>
 					<PlayerList />
 					<ColorPicker />
-				</div>
-				<div style={{float:"left"}}>
 					<EntityList />
-				</div> 
+				</div>
 	        </div>
 		</Provider>)
 	}
@@ -59,7 +68,7 @@ if(key){
 		store.dispatch(addPlayer(key));
 		store.dispatch(updateID(key));
 
-		const unsubscribe = store.subscribe(()=>console.log(JSON.stringify(store.getState().toJS())))
+		// const unsubscribe = store.subscribe(()=>console.log(JSON.stringify(store.getState().toJS())))
 
 		ReactDOM.render(<App />, document.getElementById("root"))
 	});

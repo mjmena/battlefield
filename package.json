@@ -8,7 +8,10 @@
     "start-dev-server": "babel-node server.js",
     "start": "npm-run-all -p watch-js start-dev-server"
   },
-  "author": ["Martin Mena", "Garrett Sutcliffe"],
+  "author": [
+    "Martin Mena",
+    "Garrett Sutcliffe"
+  ],
   "license": "ISC",
   "devDependencies": {
     "babel-cli": "^6.22.2",
@@ -32,6 +35,7 @@
     "js-cookie": "^2.1.4",
     "konva": "^1.3.0",
     "lodash": "^4.17.4",
+    "radium": "^0.19.4",
     "react": "^15.4.2",
     "react-color": "^2.11.1",
     "react-dom": "^15.4.2",

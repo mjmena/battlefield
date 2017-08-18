@@ -20,10 +20,11 @@ export function addEntity(x,y){
 	}
 }
 
-export function selectEntity(id){
+export function selectEntity(player_id, entity_id){
 	return {
 		type:SELECT_ENTITY,
-		id
+		player_id,
+		entity_id
 	}
 }
 

@@ -11,7 +11,7 @@ export default function reducer(state = initialState, action){
 		}
 		case SELECT_LOCAL_ENTITY: 
 		case SELECT_ENTITY: {
-			return state.setIn([action.playerID, "selectedEntityID"], action.entityID);
+			return state.setIn([action.player_id, "selectedEntityID"], action.entity_id);
 		}
 	}
 
