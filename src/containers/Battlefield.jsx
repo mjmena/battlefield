@@ -1,6 +1,6 @@
 import React from 'react';
 import {connect} from 'react-redux';
-import Grid from '../components/GridCSS';
+import Grid from '../components/Grid';
 import Entity from '../components/Entity';
 
 import {selectEntity, moveEntity} from '../actions/EntityActions';

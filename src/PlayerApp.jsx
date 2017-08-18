@@ -15,9 +15,10 @@ import LocalReducer from './reducers/LocalReducer';
 import Login from './components/Login';
 import EntityList from './containers/EntityList';
 import PlayerList from './containers/PlayerList';
-import GridCSS from './components/GridCSS';
-import Battlefield from './containers/BattlefieldCSS';
+import GridCSS from './components/Grid';
+import Battlefield from './containers/Battlefield';
 import ColorPicker from './containers/ColorPicker';
+import State from './containers/State';
 
 import io from 'socket.io-client';
 import Immutable from 'immutable';
@@ -47,6 +48,7 @@ if(key){
 				<div style={playerPaneStyle}>
 					<PlayerList />
 					<ColorPicker />
+					<State />
 					<EntityList />
 				</div>
 	        </div>
