@@ -1,6 +1,6 @@
 module.exports = {
     entry: {
-        player: "./src/PlayerApp.jsx"
+        player: "./src/App.jsx"
     },
     output: {
         filename: "[name].bundle.js",

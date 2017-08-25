@@ -11,6 +11,7 @@ const Grid = ({columns, rows, cellSize}) => {
 		margin: 0,
 		padding: 0
 	}
+
 	return (
 		<div style={style}></div>
 	)

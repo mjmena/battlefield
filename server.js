@@ -9,9 +9,9 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 import Immutable from 'immutable';
 
-import {createStore} from 'redux';
+import {createStore, applyMiddleware} from 'redux';
 import {getLocalAction} from './src/actions/EntityActions';
-import {ADD_PLAYER, removePlayer} from './src/actions/PlayerActions';
+import {addPlayer, removePlayer} from './src/actions/PlayerActions';
 import {combineReducers} from 'redux-immutable';
 import EntityReducer from './src/reducers/EntityReducer';
 import BattlefieldReducer from './src/reducers/BattlefieldReducer';
@@ -29,27 +29,53 @@ http.listen(80, function(){
 
 app.use(express.static(publicDir));
 
+
+function logger({ getState }) {
+  return next => action => {
+    console.log('will dispatch', action)
+
+    // Call the next dispatch method in the middleware chain.
+    let returnValue = next(action)
+
+    console.log('state after dispatch', getState())
+
+    // This will likely be the action itself, unless
+    // a middleware further in chain changed it.
+    return returnValue
+  }
+}
+
 const store = createStore(combineReducers({
-			entities: EntityReducer,
-			grid: BattlefieldReducer,
-			players: PlayerReducer
-		}), Immutable.Map());
+	entities: EntityReducer,
+	grid: BattlefieldReducer,
+	players: PlayerReducer
+}), Immutable.Map(), applyMiddleware(logger));
 
 io.on('connection', function(socket){
-	socket.emit('hydrate', store.getState().toJS());
+  	console.log(socket.handshake.query.user_id);
+  	
 
+  	const playerName = socket.handshake.query.user_name;
+  	if(playerName){
+  		const playerId = store.getState().get('players').size;
+  	
+	  	store.dispatch(addPlayer(playerId, playerName));
+		socket.broadcast.emit("action", addPlayer(playerId, playerName));
+
+	  	const localState = store.getState().setIn(['local','playerId'], playerId);
+
+	  	socket.emit('hydrate', localState.toJS());
+  	}else{
+  		const localState = store.getState().setIn(['local','playerId'], socket.handshake.query.user_id);
+	  	socket.emit('hydrate', localState.toJS());
+  	}
+  	
 	socket.on('action', function(action) {
+		console.log(action);
 		store.dispatch(action);
-		if(action.type == ADD_PLAYER){
-			players = players.set(socket.id, action.player);
-		}
 		socket.broadcast.emit("action", getLocalAction(action));
 	});
 
 	socket.on("disconnect", ()=>{
-		const player = players.get(socket.id);
-		store.dispatch(removePlayer(player));
-		io.emit("action", removePlayer(player));
-		players = players.remove(socket.id);
 	});
 });

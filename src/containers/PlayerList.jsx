@@ -12,7 +12,7 @@ const PlayerList = ({players, localPlayer}) => {
 const Player = ({player, selected}) => {
 	return (
 		<div style={selected ? {fontWeight:"bold"} : {}}>
-			<span style={{color: player.get("selectedColor")}}>{player.get("name")}</span>
+			<span style={{color: player.get("color")}}>{player.get("name")}</span>
 		</div>
 	)
 }
@@ -20,7 +20,7 @@ const Player = ({player, selected}) => {
 const mapStateToProps = (state) => {
 	return{
 		players: state.get("players"),
-		localPlayer: state.get("players").get(state.getIn(["local", "id"]))
+		localPlayer: state.get("players").get(state.getIn(["local", "playerId"]))
 	}
 }
 

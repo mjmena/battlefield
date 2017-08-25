@@ -1,33 +1,16 @@
 import React from 'react';
-import Cookies from 'js-cookie';
 
 export default class Login extends React.Component {
 	
-	constructor(props){
-		super(props)
-		this.state = {
-			name:""
-		}
-	}
-
-	handleSubmit(event){
-		this.setState({name: event.target.value})
-		Cookies.set("name", this.state.name);
-	}
-
-	handleChange(event){
-		this.setState({name: event.target.value})
-	}
-
 	render(){
-		return <form onSubmit={this.handleSubmit.bind(this)}>
+		return <form onSubmit={this.props.onSubmit}>
 			<input 
 				type='text' 
-				value={this.state.name} 
-				onChange={this.handleChange.bind(this)} 
-				placeholder=' Enter Name'>
+				value={this.props.name} 
+				onChange={this.props.onChange} 
+				placeholder='Enter Name'>
 			</input>
-			<button type='submit'/>
+			<button type='submit'>Submit</button>
 		</form>
 	}
 }

@@ -7,19 +7,14 @@ export default function reducer(state = initialState, action){
 	switch(action.type){
 		case SELECT_LOCAL_COLOR:
 		case SELECT_COLOR: {
-			return state.setIn([action.playerID, "selectedColor"], action.color);
+			return state.setIn([action.playerId, "color"], action.color);
 		}
 		case SELECT_LOCAL_ENTITY: 
 		case SELECT_ENTITY: {
-			return state.setIn([action.player_id, "selectedEntityID"], action.entity_id);
+			return state.setIn([action.playerId, "selectedEntityId"], action.entityId);
 		}
+		case ADD_PLAYER:
+			return state.set(action.playerId, Immutable.Map({id: action.playerId, name: action.playerName, color: '', selectedEntityId:-1}))
 	}
-
-	if(action.type === ADD_PLAYER || action.type === ADD_LOCAL_PLAYER){
-		return state.set(action.player, Immutable.fromJS({name: action.player, selectedColor: "#000000"}));
-	}else if(action.type == REMOVE_PLAYER){
-		return state.remove(action.id);
-	}
-
 	return state;
 }

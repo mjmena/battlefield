@@ -1,10 +1,9 @@
-export const UPDATE_ID = "UPDATE_ID";
+export const SET_PLAYER_ID = "SET_PLAYER_ID";
 export const UPDATE_TOOL = "UPDATE_TOOL";
 
-export function updateID(id){
-	console.log(id);
+export function setPlayerId(playerId){
 	return {
-		type: UPDATE_ID,
-		id
+		type: SET_PLAYER_ID,
+		playerId
 	}
 }

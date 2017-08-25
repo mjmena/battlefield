@@ -17,10 +17,10 @@ const Entity = ({entityId, playerId, x, y, radius, selected, onSelectEntity, onM
         onMoveEntity(entityId, x, y) 
 	}
 
-	const selectEntity = ()=>onSelectEntity(playerId, entityId);
+	const selectEntity = () => onSelectEntity(playerId, entityId);
 
 	return (
-		<div style={style} onClick={selectEntity} onDragStart={selectEntity} onDragEnd={onDragEnd} draggable='true'></div>
+		<div style={style} onClick={selectEntity} onDragEnd={onDragEnd} draggable='true'></div>
 	)
 }
 

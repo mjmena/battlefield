@@ -20,14 +20,6 @@ export function addEntity(x,y){
 	}
 }
 
-export function selectEntity(player_id, entity_id){
-	return {
-		type:SELECT_ENTITY,
-		player_id,
-		entity_id
-	}
-}
-
 export function moveEntity(id, x, y){
 	return {
 		type: MOVE_ENTITY,

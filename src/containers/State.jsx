@@ -2,8 +2,8 @@ import React from 'react';
 import {connect} from 'react-redux';
 
 const StateTree = ({state}) => {
-	return (<div style={{width:'500px'}}>
-		{JSON.stringify(state.toJS())}
+	return (<div style={{overflow:'auto'}}>
+		<pre>{JSON.stringify(state.toJS(), null, '\t')}</pre>
 	</div>)
 }
 

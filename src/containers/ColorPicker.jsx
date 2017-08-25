@@ -3,14 +3,15 @@ import {connect} from 'react-redux';
 import { CirclePicker } from 'react-color';
 import {selectColor} from './../actions/PlayerActions';
 
-const ColorPicker = ({playerID, selectedColor, onSelectColor}) => {
-	return <CirclePicker color={selectedColor} onChange={(color) => onSelectColor(playerID, color.hex)} />
+const ColorPicker = ({playerId, color, onSelectColor}) => {
+	return <CirclePicker color={color} onChange={(color) => onSelectColor(playerId, color.hex)} />
 }
 
 const mapStateToProps = (state) => {
+	const playerId = state.getIn(["local", "playerId"])
 	return{
-		playerID: state.getIn(["local", "id"]),
-		selectedColor: state.getIn(["players", state.getIn(["local", "id"]), "color"])
+		playerId,
+		color: state.getIn(["players", playerId, "color"])
 	}
 }
 

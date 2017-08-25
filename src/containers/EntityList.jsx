@@ -8,16 +8,7 @@ const Entity = ({entity, selected, onEntityClick}) => (
 	</li>)
 
 const EntityList = ({entities, selectedEntity, onEntityClick, onAddEntity}) => {
-	const style = {
-		fontWeight: "bold"
-	}
-
-	return (<ul>
-      {entities.map((entity) => {
-		return (<Entity key={entity.get("id")} entity={entity} selected={entity === selectedEntity} onEntityClick={onEntityClick}></Entity>)
-      })}
-    <button onClick={(event)=>onAddEntity(10,10)}>Add Entity</button>
-	</ul>)
+	return <button onClick={(event)=>onAddEntity(10,10)}>Add Entity</button>
 }
 
 const mapStateToProps = (state) => {
