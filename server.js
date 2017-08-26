@@ -9,7 +9,7 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 import Immutable from 'immutable';
 
-import {createStore, applyMiddleware} from 'redux';
+import {createStore} from 'redux';
 import {getLocalAction} from './src/actions/EntityActions';
 import {addPlayer, removePlayer} from './src/actions/PlayerActions';
 import {combineReducers} from 'redux-immutable';
@@ -29,48 +29,36 @@ http.listen(80, function(){
 
 app.use(express.static(publicDir));
 
-
-function logger({ getState }) {
-  return next => action => {
-    console.log('will dispatch', action)
-
-    // Call the next dispatch method in the middleware chain.
-    let returnValue = next(action)
-
-    console.log('state after dispatch', getState())
-
-    // This will likely be the action itself, unless
-    // a middleware further in chain changed it.
-    return returnValue
-  }
-}
-
 const store = createStore(combineReducers({
 	entities: EntityReducer,
 	grid: BattlefieldReducer,
 	players: PlayerReducer
-}), Immutable.Map(), applyMiddleware(logger));
+}), Immutable.Map());
 
 io.on('connection', function(socket){
-  	console.log(socket.handshake.query.user_id);
-  	
+  const playerName = socket.handshake.query.user_name;
 
-  	const playerName = socket.handshake.query.user_name;
-  	if(playerName){
-  		const playerId = store.getState().get('players').size;
-  	
-	  	store.dispatch(addPlayer(playerId, playerName));
-		socket.broadcast.emit("action", addPlayer(playerId, playerName));
+  //TODO add better state management
+  const player = store.getState().get('players').find((player, index)=>{
+    console.log(player);
+    return player.get('name') === playerName
+  })
 
-	  	const localState = store.getState().setIn(['local','playerId'], playerId);
+  let playerId = null;
+  if(player){
+    playerId = player.get('id')
+  }else{
+    playerId = "" + store.getState().get('players').size;
+  
+    store.dispatch(addPlayer(playerId, playerName));
+    socket.broadcast.emit("action", addPlayer(playerId, playerName));  
+  }
 
-	  	socket.emit('hydrate', localState.toJS());
-  	}else{
-  		const localState = store.getState().setIn(['local','playerId'], socket.handshake.query.user_id);
-	  	socket.emit('hydrate', localState.toJS());
-  	}
-  	
-	socket.on('action', function(action) {
+  const localState = store.getState().setIn(['local','playerId'], playerId);
+
+  socket.emit('hydrate', localState.toJS());
+  
+  socket.on('action', function(action) {
 		console.log(action);
 		store.dispatch(action);
 		socket.broadcast.emit("action", getLocalAction(action));

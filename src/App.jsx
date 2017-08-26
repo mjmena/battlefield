@@ -3,7 +3,7 @@ import React from 'react';
 import {createStore, applyMiddleware} from 'redux';
 import {combineReducers} from 'redux-immutable';
 import {Provider} from 'react-redux';
-import Cookies from 'js-cookie';
+import createLogger from 'redux-logger'
 import createSocketIoMiddleware from 'redux-socket.io';
 
 import EntityReducer from './reducers/EntityReducer';
@@ -16,6 +16,7 @@ import PlayerApp from './PlayerApp';
 
 import io from 'socket.io-client';
 import Immutable from 'immutable';
+
 
 class App extends React.Component {
   
@@ -32,6 +33,23 @@ class App extends React.Component {
 
   	submitUserName(event){
 	 	event.preventDefault();
+
+		const logger = createLogger({
+		  stateTransformer: (state) => {
+		    let newState = {};
+
+		    for (var i of Object.keys(state)) {
+		      if (Immutable.Iterable.isIterable(state[i])) {
+		        newState[i] = state[i].toJS();
+		      } else {
+		        newState[i] = state[i];
+		      }
+		    };
+
+		    return JSON.stringify(newState, null, 2);
+		  }
+		});
+
 	  	console.log("username:" + this.state.userName);
 	 	const socket = io('http://localhost', {query:"user_name="+this.state.userName});
 
@@ -42,8 +60,7 @@ class App extends React.Component {
 				grid: BattlefieldReducer,
 				players: PlayerReducer,
 				local: LocalReducer
-			}), Immutable.fromJS(state), applyMiddleware(socketIoMiddleware));
-			Cookies.set('ggp_player_id', state.local.playerId)
+			}), Immutable.fromJS(state), applyMiddleware(socketIoMiddleware, logger));
 		    ReactDOM.render(<PlayerApp store={store} />, document.getElementById('root'));
 		});
 	}
@@ -53,21 +70,4 @@ render() {
   }
 }
 
-const userId = Cookies.get('ggp_player_id');
-
-if(userId){
-	const socket = io('http://localhost', {query:"user_id="+userId});
-
-	socket.on("hydrate", (state) => {
-		const socketIoMiddleware = createSocketIoMiddleware(socket, "server/");
-		const store = createStore(combineReducers({
-				entities: EntityReducer,
-				grid: BattlefieldReducer,
-				players: PlayerReducer,
-				local: LocalReducer
-			}), Immutable.fromJS(state), applyMiddleware(socketIoMiddleware));
-		ReactDOM.render(<PlayerApp store={store} />, document.getElementById("root"))
-	});	
-}else{
-	ReactDOM.render(<App />, document.getElementById('root'))
-}
+ReactDOM.render(<App s/>, document.getElementById('root'));
