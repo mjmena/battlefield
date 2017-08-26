@@ -6,6 +6,7 @@ import ColorPicker from './containers/ColorPicker';
 import EntityList from './containers/EntityList';
 import PlayerList from './containers/PlayerList';
 import State from './containers/State';
+import Toolbar from './containers/Toolbar';
 
 export default ({store}) => {
 	const pane = {
@@ -25,6 +26,7 @@ export default ({store}) => {
 				</div> 
 				<div style={pane}>
 					<PlayerList />
+					<Toolbar />
 					<ColorPicker />
 					<EntityList />
 					<State />

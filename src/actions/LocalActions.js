@@ -1,9 +1,8 @@
-export const SET_PLAYER_ID = "SET_PLAYER_ID";
-export const UPDATE_TOOL = "UPDATE_TOOL";
+export const SELECT_TOOL = "SELECT_TOOL";
 
-export function setPlayerId(playerId){
+export function selectTool(tool){
 	return {
-		type: SET_PLAYER_ID,
-		playerId
+		type:SELECT_TOOL,
+		tool
 	}
 }
