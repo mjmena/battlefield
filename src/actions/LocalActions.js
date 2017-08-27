@@ -28,10 +28,8 @@ export const updateDrawing = (x, y) => {
 	}
 }
 
-export const stopDrawing = (x, y) => {
+export const stopDrawing = () => {
 	return{
-		type: STOP_DRAWING,
-		x,
-		y
+		type: STOP_DRAWING
 	} 
 }

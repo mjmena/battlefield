@@ -1,9 +1,12 @@
 import React from 'react';
 import {connect} from 'react-redux';
+import simplify from 'simplify-js';
 
 import {startDrawing, updateDrawing, stopDrawing} from '../actions/LocalActions'
+import {saveDrawing} from '../actions/DrawingActions'
+import Drawing from '../components/Drawing'
 
-const DrawingLayer = ({drawing, tool, color, startDrawing, updateDrawing, stopDrawing}) => {
+const DrawingLayer = ({localDrawing, tool, color, drawings, startDrawing, updateDrawing, stopDrawing, saveDrawing}) => {
   const onMouseDown = (event) => {
     if(tool === "DRAW"){
       const x = event.clientX;
@@ -13,7 +16,7 @@ const DrawingLayer = ({drawing, tool, color, startDrawing, updateDrawing, stopDr
   }
 
   const onMouseMove = (event) => {
-    if(drawing){
+    if(localDrawing){
       const x = event.clientX;
       const y = event.clientY;
       updateDrawing(x, y)
@@ -21,40 +24,38 @@ const DrawingLayer = ({drawing, tool, color, startDrawing, updateDrawing, stopDr
   }
 
   const onMouseUp = (event) => {
-    if(drawing){
+    if(localDrawing){
       const x = event.clientX;
       const y = event.clientY;
-      stopDrawing(x, y)
+      saveDrawing(localDrawing)
+      stopDrawing()
     }
   }
 
-  let path = ""
-  if (drawing) {
-    path = drawing.reduce((accum, coordinate) => {
-        if (accum !== "M") {
-          accum += " L"
-        }
-        return accum + coordinate.get("x") + " " + coordinate.get("y")
-    }, "M")
-  }
+  const paths = drawings.map((coordinates) => {
+    return <Drawing coordinates={coordinates} color={color} />
+  }).toList()
 
   return (
     <svg width="100%" height="100%" onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={onMouseUp}>
-      <path d={path} stroke={color} strokeWidth="3" fill="none"/>
+      <Drawing coordinates={localDrawing} color={color} />
+      {paths}
     </svg>
   )
 }
 
 const mapStateToProps = (state) => {
   return{
-    drawing: state.getIn(["local", "drawing"]),
+    localDrawing: state.getIn(["local", "drawing"]),
     tool: state.getIn(["local", "tool"]),
-    color: state.getIn(["players", state.getIn(["local", "playerId"]), "color"])
+    color: state.getIn(["players", state.getIn(["local", "playerId"]), "color"]),
+    drawings: state.get("drawings")
   }
 }
 
 export default connect(mapStateToProps, {
-  startDrawing:startDrawing, 
-  updateDrawing:updateDrawing, 
-  stopDrawing:stopDrawing
+  startDrawing, 
+  updateDrawing, 
+  stopDrawing,
+  saveDrawing
 })(DrawingLayer);

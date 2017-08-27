@@ -10,6 +10,7 @@ import EntityReducer from './reducers/EntityReducer';
 import BattlefieldReducer from './reducers/BattlefieldReducer';
 import PlayerReducer from './reducers/PlayerReducer';
 import LocalReducer from './reducers/LocalReducer';
+import DrawingReducer from './reducers/DrawingReducer';
 
 import Login from './components/Login';
 import PlayerApp from './PlayerApp';
@@ -59,7 +60,8 @@ class App extends React.Component {
 				entities: EntityReducer,
 				grid: BattlefieldReducer,
 				players: PlayerReducer,
-				local: LocalReducer
+				local: LocalReducer,
+				drawings: DrawingReducer
 			}), Immutable.fromJS(state), applyMiddleware(socketIoMiddleware));
 		    ReactDOM.render(<PlayerApp store={store} />, document.getElementById('root'));
 		});

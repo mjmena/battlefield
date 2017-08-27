@@ -16,6 +16,7 @@ import {combineReducers} from 'redux-immutable';
 import EntityReducer from './src/reducers/EntityReducer';
 import BattlefieldReducer from './src/reducers/BattlefieldReducer';
 import PlayerReducer from './src/reducers/PlayerReducer';
+import DrawingReducer from './src/reducers/DrawingReducer';
 
 let players = Immutable.Map();
 
@@ -32,7 +33,8 @@ app.use(express.static(publicDir));
 const store = createStore(combineReducers({
 	entities: EntityReducer,
 	grid: BattlefieldReducer,
-	players: PlayerReducer
+	players: PlayerReducer,
+  drawings: DrawingReducer
 }), Immutable.Map());
 
 io.on('connection', function(socket){

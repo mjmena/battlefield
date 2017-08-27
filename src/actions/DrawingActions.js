@@ -1,7 +1,9 @@
-import Immutable from 'immutable';
+export const SAVE_DRAWING = "server/SAVE_DRAWING"
+export const LOCAL_SAVE_DRAWING = "SAVE_DRAWING"
 
-export const DRAWING_ACTIONS = new Immutable.Record({
-	START: "START_DRAWING",
-	UPDATE: "UPDATE_DRAWING",
-	STOP: "STOP_DRAWING"
-});
+export const saveDrawing = (drawing) => {
+	return {
+		type:SAVE_DRAWING,
+		drawing
+	}
+}
