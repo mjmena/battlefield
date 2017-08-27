@@ -2,8 +2,8 @@ import React from 'react';
 import {connect} from 'react-redux';
 import Grid from '../components/Grid';
 import Entity from '../components/Entity';
-import MeasurementLayer from "./MeasurementLayer"
-
+import MeasurementLayer from "./MeasurementLayer";
+import DrawingLayer from "./DrawingLayer";
 import {selectEntity} from '../actions/PlayerActions';
 import {moveEntity} from '../actions/EntityActions';
 
@@ -34,6 +34,7 @@ const Battlefield = ({entities, players, playerId, cellSize, tool, onSelectEntit
     <div>
       <Grid rows={50} columns={50} cellSize={cellSize}>
         {drawnEntities}
+        <DrawingLayer />
         <MeasurementLayer />
       </Grid>  
     </div>

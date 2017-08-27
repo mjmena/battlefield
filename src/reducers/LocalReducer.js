@@ -1,11 +1,20 @@
 import Immutable from 'immutable';
-import {SELECT_TOOL} from '../actions/LocalActions';
-
+import {SELECT_TOOL, START_DRAWING, UPDATE_DRAWING, STOP_DRAWING} from '../actions/LocalActions';
 const initialState = Immutable.Map();
 
 export default function reducer(state = initialState, action){
+	console.log(action);
 	switch(action.type){
 		case SELECT_TOOL: return state.set("tool", action.tool);
+		case START_DRAWING:{
+			return state.set("drawing", Immutable.List([Immutable.Map({x:action.x, y:action.y})]));
+		}
+		case UPDATE_DRAWING:{
+			return state.update("drawing", (drawing)=>drawing.push(Immutable.Map({x:action.x, y:action.y})))
+		}
+		case STOP_DRAWING: {
+			return state.remove("drawing");
+		}
 	}
 	return state;
 }

@@ -5,7 +5,7 @@ import {Tool} from '../Enums';
 import {selectTool} from './../actions/LocalActions';
 
 const Toolbar = ({tool, selectTool}) => {
-	const tools = Tool.map((val, key) => <div style={key === tool ? {fontWeight:'bold'} : {fontWeight:'normal'}} onClick={()=>selectTool(key)}>{val}</div>)
+	const tools = Tool.map((val, key) => <div key={key} style={key === tool ? {fontWeight:'bold'} : {fontWeight:'normal'}} onClick={()=>selectTool(key)}>{val}</div>).toList()
 
 	return (
 		<div>

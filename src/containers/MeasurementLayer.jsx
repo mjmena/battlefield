@@ -32,9 +32,9 @@ const MeasurementLayer = ({players, playerId, cellSize, tool, startMeasurement, 
   const measurements = players.map((player) => {
     const measurement = player.get('measurement');
     if(measurement){
-      return <Measurement {...measurement.toJSON()} cellSize={cellSize} color={player.get('color')}></Measurement>
+      return <Measurement key={player.get('id')} {...measurement.toJSON()} cellSize={cellSize} color={player.get('color')}></Measurement>
     }
-  });
+  }).toList();
 
   return (
     <svg width="100%" height="100%" onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={onMouseUp}>
