@@ -2,11 +2,12 @@ import React from 'react';
 import {connect} from 'react-redux';
 import Grid from '../components/Grid';
 import Entity from '../components/Entity';
+import MeasurementLayer from "./MeasurementLayer"
 
-import {selectEntity} from '../actions/PlayerActions'
+import {selectEntity} from '../actions/PlayerActions';
 import {moveEntity} from '../actions/EntityActions';
 
-const Battlefield = ({entities, players, localPlayerId, cellSize, onSelectEntity, onMoveEntity}) => {
+const Battlefield = ({entities, players, playerId, cellSize, tool, onSelectEntity, onMoveEntity}) => {
   
   const drawnEntities = entities.map((entity) => {
 
@@ -16,7 +17,7 @@ const Battlefield = ({entities, players, localPlayerId, cellSize, onSelectEntity
     const circle = {
       key: entity.get("id"),
       entityId: entity.get("id"),
-      playerId: localPlayerId,
+      playerId: playerId,
       x: entity.get("transform").get("x") * cellSize - cellSize,
       y: entity.get("transform").get("y") * cellSize - cellSize,
       radius: cellSize/2,
@@ -27,10 +28,14 @@ const Battlefield = ({entities, players, localPlayerId, cellSize, onSelectEntity
     return <Entity {...circle}></Entity>
   });
 
+  
+
   return (
     <div>
-      <Grid rows={50} columns={50} cellSize={cellSize}></Grid>
-      {drawnEntities}  
+      <Grid rows={50} columns={50} cellSize={cellSize}>
+        {drawnEntities}
+        <MeasurementLayer />
+      </Grid>  
     </div>
   )
 }
@@ -42,8 +47,9 @@ const mapStateToProps = (state) => {
   return{
     entities: entities,
     players: state.get("players"),
-    localPlayerId: playerId,
-    cellSize: grid.get("cellSize")
+    playerId: playerId,
+    cellSize: grid.get("cellSize"),
+    tool: state.getIn(["local", "tool"])
   }
 }
 

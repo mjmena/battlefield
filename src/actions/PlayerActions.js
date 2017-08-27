@@ -1,13 +1,20 @@
 export const ADD_PLAYER = "ADD_PLAYER";
 export const ADD_LOCAL_PLAYER = "ADD_PLAYER";
-export const REMOVE_PLAYER = "REMOVE_PLAYER";
+
 export const SELECT_ENTITY = "server/SELECT_ENTITY";
 export const SELECT_LOCAL_ENTITY = "SELECT_ENTITY";
+
 export const SELECT_COLOR = "server/SELECT_COLOR";
 export const SELECT_LOCAL_COLOR = "SELECT_COLOR";
-export const GO_ONLINE = "GO_ONLINE";
-export const GO_OFFLINE = "GO_OFFLINE";
 
+export const START_MEASUREMENT = 'server/START_MEASUREMENT';
+export const START_LOCAL_MEASUREMENT = 'START_MEASUREMENT';
+
+export const UPDATE_MEASUREMENT = 'server/UPDATE_MEASUREMENT';
+export const UPDATE_LOCAL_MEASUREMENT = 'UPDATE_MEASUREMENT';
+
+export const STOP_MEASUREMENT = 'server/STOP_MEASUREMENT';
+export const STOP_LOCAL_MEASUREMENT = 'STOP_MEASUREMENT';
 
 export function addPlayer(playerId, playerName){
 	return {
@@ -17,12 +24,6 @@ export function addPlayer(playerId, playerName){
 	}
 }
 
-export function removePlayer(id){
-	return {
-		type: REMOVE_PLAYER,
-		id
-	}
-}
 export function selectColor(playerId, color){
 	return {
 		type: SELECT_COLOR,
@@ -30,6 +31,7 @@ export function selectColor(playerId, color){
 		color
 	}
 }
+
 export function selectEntity(playerId, entityId){
 	return {
 		type: SELECT_ENTITY,
@@ -38,16 +40,27 @@ export function selectEntity(playerId, entityId){
 	}
 }
 
-export function goOnline(playerId){
+export function startMeasurement(playerId, x, y){
 	return {
-		type: GO_ONLINE,
-		playerId
+		type:START_MEASUREMENT,
+		playerId,
+		x,
+		y
 	}
 }
 
-export function goOffline(playerId){
+export function updateMeasurement(playerId, x, y){
 	return {
-		type: GO_OFFLINE,
-		playerId
+		type:UPDATE_MEASUREMENT,
+		playerId,
+		x,
+		y
 	}
+}
+
+export function stopMeasurement(playerId){
+	return {
+		type:STOP_MEASUREMENT,
+		playerId
+	}	
 }

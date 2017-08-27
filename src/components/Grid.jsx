@@ -1,6 +1,6 @@
 import React from 'react'
 
-const Grid = ({columns, rows, cellSize}) => {
+const Grid = ({columns, rows, cellSize, children}) => {
 	const style = {
 		backgroundSize: cellSize + 'px ' + cellSize +'px',
 		backgroundImage: 'linear-gradient(to right, grey 1px, transparent 1px), linear-gradient(to bottom, grey 1px, transparent 1px)',
@@ -13,7 +13,9 @@ const Grid = ({columns, rows, cellSize}) => {
 	}
 
 	return (
-		<div style={style}></div>
+		<div style={style}>
+			{children}
+		</div>
 	)
 }
 

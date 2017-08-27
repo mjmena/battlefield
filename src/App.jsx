@@ -60,7 +60,7 @@ class App extends React.Component {
 				grid: BattlefieldReducer,
 				players: PlayerReducer,
 				local: LocalReducer
-			}), Immutable.fromJS(state), applyMiddleware(socketIoMiddleware, logger));
+			}), Immutable.fromJS(state), applyMiddleware(socketIoMiddleware));
 		    ReactDOM.render(<PlayerApp store={store} />, document.getElementById('root'));
 		});
 	}
