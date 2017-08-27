@@ -86,11 +86,11 @@
 	
 	var _LocalReducer2 = _interopRequireDefault(_LocalReducer);
 	
-	var _Login = __webpack_require__(246);
+	var _Login = __webpack_require__(245);
 	
 	var _Login2 = _interopRequireDefault(_Login);
 	
-	var _PlayerApp = __webpack_require__(247);
+	var _PlayerApp = __webpack_require__(246);
 	
 	var _PlayerApp2 = _interopRequireDefault(_PlayerApp);
 	
@@ -31197,8 +31197,7 @@
 	};
 
 /***/ }),
-/* 245 */,
-/* 246 */
+/* 245 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -31256,7 +31255,7 @@
 	exports.default = Login;
 
 /***/ }),
-/* 247 */
+/* 246 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -31271,7 +31270,7 @@
 	
 	var _reactRedux = __webpack_require__(212);
 	
-	var _Battlefield = __webpack_require__(248);
+	var _Battlefield = __webpack_require__(247);
 	
 	var _Battlefield2 = _interopRequireDefault(_Battlefield);
 	
@@ -31334,7 +31333,7 @@
 	};
 
 /***/ }),
-/* 248 */
+/* 247 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -31349,19 +31348,19 @@
 	
 	var _reactRedux = __webpack_require__(212);
 	
-	var _Grid = __webpack_require__(249);
+	var _Grid = __webpack_require__(248);
 	
 	var _Grid2 = _interopRequireDefault(_Grid);
 	
-	var _Entity = __webpack_require__(250);
+	var _Entity = __webpack_require__(249);
 	
 	var _Entity2 = _interopRequireDefault(_Entity);
 	
-	var _MeasurementLayer = __webpack_require__(251);
+	var _MeasurementLayer = __webpack_require__(250);
 	
 	var _MeasurementLayer2 = _interopRequireDefault(_MeasurementLayer);
 	
-	var _DrawingLayer = __webpack_require__(530);
+	var _DrawingLayer = __webpack_require__(252);
 	
 	var _DrawingLayer2 = _interopRequireDefault(_DrawingLayer);
 	
@@ -31400,17 +31399,31 @@
 	    return _react2.default.createElement(_Entity2.default, circle);
 	  });
 	
-	  return _react2.default.createElement(
-	    'div',
-	    null,
-	    _react2.default.createElement(
-	      _Grid2.default,
-	      { rows: 50, columns: 50, cellSize: cellSize },
-	      drawnEntities,
-	      _react2.default.createElement(_DrawingLayer2.default, null),
-	      _react2.default.createElement(_MeasurementLayer2.default, null)
-	    )
-	  );
+	  if (tool === "DRAW") {
+	    return _react2.default.createElement(
+	      'div',
+	      null,
+	      _react2.default.createElement(
+	        _Grid2.default,
+	        { rows: 50, columns: 50, cellSize: cellSize },
+	        drawnEntities,
+	        _react2.default.createElement(_DrawingLayer2.default, null),
+	        _react2.default.createElement(_MeasurementLayer2.default, null)
+	      )
+	    );
+	  } else {
+	    return _react2.default.createElement(
+	      'div',
+	      null,
+	      _react2.default.createElement(
+	        _Grid2.default,
+	        { rows: 50, columns: 50, cellSize: cellSize },
+	        drawnEntities,
+	        _react2.default.createElement(_MeasurementLayer2.default, null),
+	        _react2.default.createElement(_DrawingLayer2.default, null)
+	      )
+	    );
+	  }
 	};
 	
 	var mapStateToProps = function mapStateToProps(state) {
@@ -31429,7 +31442,7 @@
 	exports.default = (0, _reactRedux.connect)(mapStateToProps, { onSelectEntity: _PlayerActions.selectEntity, onMoveEntity: _EntityActions.moveEntity })(Battlefield);
 
 /***/ }),
-/* 249 */
+/* 248 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -31471,7 +31484,7 @@
 	exports.default = Grid;
 
 /***/ }),
-/* 250 */
+/* 249 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -31522,7 +31535,7 @@
 	exports.default = Entity;
 
 /***/ }),
-/* 251 */
+/* 250 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -31539,7 +31552,7 @@
 	
 	var _reactRedux = __webpack_require__(212);
 	
-	var _Measurement = __webpack_require__(252);
+	var _Measurement = __webpack_require__(251);
 	
 	var _Measurement2 = _interopRequireDefault(_Measurement);
 	
@@ -31607,7 +31620,7 @@
 	exports.default = (0, _reactRedux.connect)(mapStateToProps, { startMeasurement: _PlayerActions.startMeasurement, updateMeasurement: _PlayerActions.updateMeasurement, stopMeasurement: _PlayerActions.stopMeasurement })(MeasurementLayer);
 
 /***/ }),
-/* 252 */
+/* 251 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -31659,6 +31672,89 @@
 	};
 	
 	exports.default = Measurement;
+
+/***/ }),
+/* 252 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _react = __webpack_require__(183);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactRedux = __webpack_require__(212);
+	
+	var _LocalActions = __webpack_require__(244);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var DrawingLayer = function DrawingLayer(_ref) {
+	  var drawing = _ref.drawing,
+	      tool = _ref.tool,
+	      color = _ref.color,
+	      startDrawing = _ref.startDrawing,
+	      updateDrawing = _ref.updateDrawing,
+	      stopDrawing = _ref.stopDrawing;
+	
+	  var onMouseDown = function onMouseDown(event) {
+	    if (tool === "DRAW") {
+	      var x = event.clientX;
+	      var y = event.clientY;
+	      startDrawing(x, y);
+	    }
+	  };
+	
+	  var onMouseMove = function onMouseMove(event) {
+	    if (drawing) {
+	      var x = event.clientX;
+	      var y = event.clientY;
+	      updateDrawing(x, y);
+	    }
+	  };
+	
+	  var onMouseUp = function onMouseUp(event) {
+	    if (drawing) {
+	      var x = event.clientX;
+	      var y = event.clientY;
+	      stopDrawing(x, y);
+	    }
+	  };
+	
+	  var path = "";
+	  if (drawing) {
+	    path = drawing.reduce(function (accum, coordinate) {
+	      if (accum !== "M") {
+	        accum += " L";
+	      }
+	      return accum + coordinate.get("x") + " " + coordinate.get("y");
+	    }, "M");
+	  }
+	
+	  return _react2.default.createElement(
+	    'svg',
+	    { width: '100%', height: '100%', onMouseDown: onMouseDown, onMouseMove: onMouseMove, onMouseUp: onMouseUp },
+	    _react2.default.createElement('path', { d: path, stroke: color, strokeWidth: '3', fill: 'none' })
+	  );
+	};
+	
+	var mapStateToProps = function mapStateToProps(state) {
+	  return {
+	    drawing: state.getIn(["local", "drawing"]),
+	    tool: state.getIn(["local", "tool"]),
+	    color: state.getIn(["players", state.getIn(["local", "playerId"]), "color"])
+	  };
+	};
+	
+	exports.default = (0, _reactRedux.connect)(mapStateToProps, {
+	  startDrawing: _LocalActions.startDrawing,
+	  updateDrawing: _LocalActions.updateDrawing,
+	  stopDrawing: _LocalActions.stopDrawing
+	})(DrawingLayer);
 
 /***/ }),
 /* 253 */
@@ -53586,73 +53682,6 @@
 	};
 	
 
-
-/***/ }),
-/* 530 */
-/***/ (function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
-	var _react = __webpack_require__(183);
-	
-	var _react2 = _interopRequireDefault(_react);
-	
-	var _reactRedux = __webpack_require__(212);
-	
-	var _LocalActions = __webpack_require__(244);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	var DrawingLayer = function DrawingLayer(_ref) {
-	  var drawing = _ref.drawing,
-	      tool = _ref.tool,
-	      startDrawing = _ref.startDrawing,
-	      updateDrawing = _ref.updateDrawing,
-	      stopDrawing = _ref.stopDrawing;
-	
-	  var onMouseDown = function onMouseDown(event) {
-	    if (tool === "DRAW") {
-	      var x = event.clientX;
-	      var y = event.clientY;
-	      startDrawing(x, y);
-	    }
-	  };
-	
-	  var onMouseMove = function onMouseMove(event) {
-	    if (drawing) {
-	      var x = event.clientX;
-	      var y = event.clientY;
-	      updateDrawing(x, y);
-	    }
-	  };
-	
-	  var onMouseUp = function onMouseUp(event) {
-	    if (drawing) {
-	      var x = event.clientX;
-	      var y = event.clientY;
-	      stopDrawing(x, y);
-	    }
-	  };
-	
-	  return _react2.default.createElement('svg', { width: '100%', height: '100%', onMouseDown: onMouseDown, onMouseMove: onMouseMove, onMouseUp: onMouseUp });
-	};
-	
-	var mapStateToProps = function mapStateToProps(state) {
-	  return {
-	    drawing: state.getIn(["local", "drawing"]),
-	    tool: state.getIn(["local", "tool"])
-	  };
-	};
-	
-	exports.default = (0, _reactRedux.connect)(mapStateToProps, {
-	  startDrawing: _LocalActions.startDrawing,
-	  updateDrawing: _LocalActions.updateDrawing,
-	  stopDrawing: _LocalActions.stopDrawing
-	})(DrawingLayer);
 
 /***/ })
 /******/ ]);

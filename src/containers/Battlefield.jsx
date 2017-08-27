@@ -29,16 +29,27 @@ const Battlefield = ({entities, players, playerId, cellSize, tool, onSelectEntit
   });
 
   
-
-  return (
-    <div>
-      <Grid rows={50} columns={50} cellSize={cellSize}>
-        {drawnEntities}
-        <DrawingLayer />
-        <MeasurementLayer />
-      </Grid>  
-    </div>
-  )
+  if (tool === "DRAW") {
+    return (
+      <div>
+        <Grid rows={50} columns={50} cellSize={cellSize}>
+          {drawnEntities}
+          <DrawingLayer />
+          <MeasurementLayer />
+        </Grid>  
+      </div>
+    )
+  } else {
+    return (
+      <div>
+        <Grid rows={50} columns={50} cellSize={cellSize}>
+          {drawnEntities}
+          <MeasurementLayer />
+          <DrawingLayer />
+        </Grid>  
+      </div>
+    )
+  }
 }
 
 const mapStateToProps = (state) => {
