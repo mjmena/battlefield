@@ -1,4 +1,4 @@
-import ReactDOM from'react-dom';
+import ReactDOM from 'react-dom';
 import React from 'react';
 import {createStore, applyMiddleware} from 'redux';
 import {combineReducers} from 'redux-immutable';
@@ -18,58 +18,55 @@ import PlayerApp from './PlayerApp';
 import io from 'socket.io-client';
 import Immutable from 'immutable';
 
-
 class App extends React.Component {
-  
-	constructor(props){
-		super(props);
-		this.state ={
-			userName: '',
-		}
-	}
 
-	changeUserName(event){
-	  	this.setState({userName:event.target.value});
-	}
+  constructor(props) {
+    super(props);
+    this.state = {
+      userName: ''
+    }
+  }
 
-  	submitUserName(event){
-	 	event.preventDefault();
+  changeUserName(event) {
+    this.setState({userName: event.target.value});
+  }
 
-		const logger = createLogger({
-		  stateTransformer: (state) => {
-		    let newState = {};
+  submitUserName(event) {
+    event.preventDefault();
 
-		    for (var i of Object.keys(state)) {
-		      if (Immutable.Iterable.isIterable(state[i])) {
-		        newState[i] = state[i].toJS();
-		      } else {
-		        newState[i] = state[i];
-		      }
-		    };
+    const logger = createLogger({
+      stateTransformer: (state) => {
+        let newState = {};
 
-		    return JSON.stringify(newState, null, 2);
-		  }
-		});
+        for (var i of Object.keys(state)) {
+          if (Immutable.Iterable.isIterable(state[i])) {
+            newState[i] = state[i].toJS();
+          } else {
+            newState[i] = state[i];
+          }
+        };
 
-	  	console.log("username:" + this.state.userName);
-	 	const socket = io('http://localhost', {query:"user_name="+this.state.userName});
+        return JSON.stringify(newState, null, 2);
+      }
+    });
 
-		socket.on("hydrate", (state) => {
-			const socketIoMiddleware = createSocketIoMiddleware(socket, "server/");
-			const store = createStore(combineReducers({
-				entities: EntityReducer,
-				grid: BattlefieldReducer,
-				players: PlayerReducer,
-				local: LocalReducer,
-				drawings: DrawingReducer
-			}), Immutable.fromJS(state), applyMiddleware(socketIoMiddleware));
-		    ReactDOM.render(<PlayerApp store={store} />, document.getElementById('root'));
-		});
-	}
+    console.log("username:" + this.state.userName);
+    const socket = io('http://localhost', {
+      query: "user_name=" + this.state.userName
+    });
 
-render() {
-    return <Login userName={this.state.userName} onChange={this.changeUserName.bind(this)} onSubmit={this.submitUserName.bind(this)} />
+    socket.on("hydrate", (state) => {
+      const socketIoMiddleware = createSocketIoMiddleware(socket, "server/");
+      const store = createStore(combineReducers({entities: EntityReducer, grid: BattlefieldReducer, players: PlayerReducer, local: LocalReducer, drawings: DrawingReducer}), Immutable.fromJS(state), applyMiddleware(socketIoMiddleware));
+      ReactDOM.render(
+        <PlayerApp store={store}/>, document.getElementById('root'));
+    });
+  }
+
+  render() {
+    return <Login userName={this.state.userName} onChange={this.changeUserName.bind(this)} onSubmit={this.submitUserName.bind(this)}/>
   }
 }
 
-ReactDOM.render(<App s/>, document.getElementById('root'));
+ReactDOM.render(
+  <App s/>, document.getElementById('root'));

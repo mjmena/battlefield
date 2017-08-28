@@ -40,6 +40,7 @@
     "react": "^15.4.2",
     "react-color": "^2.11.1",
     "react-dom": "^15.4.2",
+    "react-dragscroll": "^1.0.21",
     "react-redux": "^5.0.2",
     "redux": "^3.6.0",
     "redux-immutable": "^3.0.10",
