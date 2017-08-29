@@ -1,5 +1,6 @@
 import React from 'react';
 import {Provider} from 'react-redux';
+import PropTypes from 'prop-types';
 
 import Battlefield from './containers/Battlefield';
 import ColorPicker from './containers/ColorPicker';
@@ -7,8 +8,10 @@ import EntityList from './containers/EntityList';
 import PlayerList from './containers/PlayerList';
 import State from './containers/State';
 import Toolbar from './containers/Toolbar';
-
-export default ({store}) => {
+import {DragDropContext} from 'react-dnd';
+import MouseBackEnd from 'react-dnd-mouse-backend'
+import { default as TouchBackend } from 'react-dnd-touch-backend';
+const PlayerApp = ({store}) => {
   const pane = {
     position: "fixed",
     top: 0,
@@ -16,7 +19,9 @@ export default ({store}) => {
     backgroundColor: "rgba(60,60,60,.2)",
     borderRadius: 25,
     padding: 25,
-    overflow: scroll
+    zIndex:10,
+    height:'100%',
+    overflow:'scroll'
   }
 
   return (
@@ -41,3 +46,9 @@ export default ({store}) => {
     </Provider>
   )
 }
+
+PlayerApp.propTypes = {
+  store: PropTypes.object
+}
+
+export default DragDropContext(TouchBackend({enableMouseEvents:true}))(PlayerApp)

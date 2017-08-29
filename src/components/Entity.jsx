@@ -1,27 +1,55 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+import {DragSource} from 'react-dnd';
 
-const Entity = ({entityId, playerId, x, y, radius, selected, onSelectEntity, onMoveEntity}) => {
-	const style = {
-		position: 'absolute',
-		top: y+1,
-		left: x+1,
-		width: radius * 2 - 1,
-		height: radius * 2 - 1,
-		borderRadius: '50%',
-		backgroundColor: selected ? selected : 'black'
-	}
+import {ItemTypes} from '../Enums';
 
-	const onDragEnd = (event) =>{
-		const x = Math.ceil(event.clientX / (radius * 2));
-        const y = Math.ceil(event.clientY / (radius * 2)); 
-        onMoveEntity(entityId, x, y) 
-	}
-
-	const selectEntity = () => onSelectEntity(playerId, entityId);
-
-	return (
-		<div style={style} onClick={selectEntity} onDragEnd={onDragEnd} draggable='true'></div>
-	)
+const entitySource = {
+  beginDrag(props){
+    return{
+      entityId: props.entityId
+    }
+  },
+  endDrag(props, monitor){
+    const coordinate = monitor.getClientOffset();
+    const x = Math.ceil(coordinate.x / (props.radius * 2));
+    const y = Math.ceil(coordinate.y / (props.radius * 2));
+    props.onMoveEntity(props.entityId, x, y)
+  }
 }
 
-export default Entity;
+const collect = (connect) => {
+  return {
+    connectDragSource: connect.dragSource()
+  }
+}
+
+class Entity extends React.Component {
+  constructor(props) {
+    super(props)
+    this.onClick = this.onClick.bind(this)
+  }
+
+  onClick() {
+    this.props.onSelectEntity(this.props.playerId, this.props.entityId);
+  }
+
+  render() {
+    const {x, y, radius, connectDragSource} = this.props;
+    return (connectDragSource(<circle cx={x + radius} cy={y + radius} r={radius} fill={this.props.selected} onClick={this.onClick} onMouseDown={(event)=>event.preventDefault()} />))
+  }
+}
+
+Entity.propTypes = {
+  entityId: PropTypes.string,
+  playerId: PropTypes.string,
+  x: PropTypes.number,
+  y: PropTypes.number,
+  radius: PropTypes.number,
+  selected: PropTypes.string,
+  onSelectEntity: PropTypes.func,
+  onMoveEntity: PropTypes.func,
+  connectDragSource: PropTypes.func.isRequired,
+}
+
+export default DragSource(ItemTypes.ENTITY, entitySource, collect)(Entity);

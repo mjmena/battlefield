@@ -2,8 +2,6 @@ import ReactDOM from 'react-dom';
 import React from 'react';
 import {createStore, applyMiddleware} from 'redux';
 import {combineReducers} from 'redux-immutable';
-import {Provider} from 'react-redux';
-import createLogger from 'redux-logger'
 import createSocketIoMiddleware from 'redux-socket.io';
 
 import EntityReducer from './reducers/EntityReducer';
@@ -34,30 +32,20 @@ class App extends React.Component {
   submitUserName(event) {
     event.preventDefault();
 
-    const logger = createLogger({
-      stateTransformer: (state) => {
-        let newState = {};
-
-        for (var i of Object.keys(state)) {
-          if (Immutable.Iterable.isIterable(state[i])) {
-            newState[i] = state[i].toJS();
-          } else {
-            newState[i] = state[i];
-          }
-        };
-
-        return JSON.stringify(newState, null, 2);
-      }
-    });
-
-    console.log("username:" + this.state.userName);
     const socket = io('http://localhost', {
       query: "user_name=" + this.state.userName
     });
 
     socket.on("hydrate", (state) => {
       const socketIoMiddleware = createSocketIoMiddleware(socket, "server/");
-      const store = createStore(combineReducers({entities: EntityReducer, grid: BattlefieldReducer, players: PlayerReducer, local: LocalReducer, drawings: DrawingReducer}), Immutable.fromJS(state), applyMiddleware(socketIoMiddleware));
+      const fromJSGreedy = (js) => {
+        return typeof js !== 'object' || js === null
+          ? js
+          : Array.isArray(js)
+            ? Immutable.Seq(js).map(fromJSGreedy).toList()
+            : Immutable.Seq(js).map(fromJSGreedy).toMap();
+      }
+      const store = createStore(combineReducers({local: LocalReducer, players: PlayerReducer, entities: EntityReducer, grid: BattlefieldReducer, drawings: DrawingReducer}), fromJSGreedy(state), applyMiddleware(socketIoMiddleware));
       ReactDOM.render(
         <PlayerApp store={store}/>, document.getElementById('root'));
     });
@@ -69,4 +57,4 @@ class App extends React.Component {
 }
 
 ReactDOM.render(
-  <App s/>, document.getElementById('root'));
+  <App/>, document.getElementById('root'));

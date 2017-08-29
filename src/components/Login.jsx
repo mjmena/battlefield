@@ -1,7 +1,6 @@
 import React from 'react';
-
-export default class Login extends React.Component {
-
+import PropTypes from 'prop-types';
+class Login extends React.Component {
   render() {
     return <form onSubmit={this.props.onSubmit}>
       <input type='text' value={this.props.name} onChange={this.props.onChange} placeholder='Enter Name'></input>
@@ -9,3 +8,11 @@ export default class Login extends React.Component {
     </form>
   }
 }
+
+Login.propTypes = {
+  name: PropTypes.string,
+  onChange: PropTypes.func,
+  onSubmit: PropTypes.func
+}
+
+export default Login;

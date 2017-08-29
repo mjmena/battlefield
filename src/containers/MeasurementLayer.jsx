@@ -1,68 +1,33 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
+import Immutable from 'immutable';
 
 import Measurement from '../components/Measurement';
-import {startMeasurement, updateMeasurement, stopMeasurement} from '../actions/PlayerActions'
 
-const MeasurementLayer = ({
-  players,
-  playerId,
-  cellSize,
-  tool,
-  startMeasurement,
-  updateMeasurement,
-  stopMeasurement
-}) => {
-  const onMouseDown = (event) => {
-    if (tool === "RULER") {
-      const x = Math.floor(event.clientX / cellSize);
-      const y = Math.floor(event.clientY / cellSize);
-      startMeasurement(playerId, x, y)
-    }
-  }
-
-  const onMouseMove = (event) => {
-    const measurement = players.getIn([playerId, 'measurement'])
-    if (measurement) {
-      const x = Math.floor(event.clientX / cellSize);
-      const y = Math.floor(event.clientY / cellSize);
-      if (measurement.get("endX") !== x || measurement.get("endY") !== y) {
-        updateMeasurement(playerId, x, y)
+class MeasurementLayer extends React.Component {
+  render() {
+    const measurements = this.props.players.map((player) => {
+      const measurement = player.get('measurement');
+      if (measurement) {
+        return <Measurement key={player.get('id')} {...measurement.toJSON()} cellSize={this.props.cellSize} color={player.get('color')}></Measurement>
       }
-    }
-  }
+    }).toList();
 
-  const onMouseUp = () => {
-    if (players.getIn([playerId, 'measurement'])) {
-      stopMeasurement(playerId)
-    }
+    return <g>{measurements}</g>
   }
-  const measurements = players.map((player) => {
-    const measurement = player.get('measurement');
-    if (measurement) {
-      return <Measurement key={player.get('id')} {...measurement.toJSON()} cellSize={cellSize} color={player.get('color')}></Measurement>
-    }
-  }).toList();
+}
 
-  return (
-    <svg width="100%" height="100%" onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={onMouseUp}>
-      {measurements}
-    </svg>
-  )
+MeasurementLayer.propTypes = {
+  players: PropTypes.instanceOf(Immutable.Map),
+  cellSize: PropTypes.number
 }
 
 const mapStateToProps = (state) => {
   return {
     players: state.get("players"),
-    playerId: state.getIn(["local", "playerId"]),
     cellSize: state.getIn(["grid", "cellSize"]),
-    tool: state.getIn(["local", "tool"])
-
   }
 }
 
-export default connect(mapStateToProps, {
-  startMeasurement: startMeasurement,
-  updateMeasurement: updateMeasurement,
-  stopMeasurement: stopMeasurement
-})(MeasurementLayer);
+export default connect(mapStateToProps)(MeasurementLayer);

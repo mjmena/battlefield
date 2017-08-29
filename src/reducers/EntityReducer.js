@@ -16,7 +16,7 @@ export default function reducer(state = initialState, action) {
     })
   } else if (action.type === ADD_ENTITY || action.type === ADD_LOCAL_ENTITY) {
     return state.push(Immutable.fromJS({
-      id: state.size,
+      id: ""+state.size,
       transform: {
         x: action.x,
         y: action.y

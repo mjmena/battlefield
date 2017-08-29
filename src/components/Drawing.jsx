@@ -4,6 +4,7 @@ const Drawing = ({coordinates, color}) => {
 
   let path = ""
   if (coordinates) {
+    console.log(coordinates);
     path = coordinates.reduce((accum, coordinate) => {
         if (accum !== "M") {
           accum += " L"
