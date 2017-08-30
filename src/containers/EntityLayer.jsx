@@ -38,7 +38,7 @@ class EntityLayer extends React.Component{
 
 EntityLayer.propTypes = {
   playerId: PropType.string,
-  entities: PropType.instanceOf(Immutable.Map),
+  entities: PropType.instanceOf(Immutable.List),
   players: PropType.instanceOf(Immutable.Map),
   cellSize: PropType.number,
   onSelectEntity: PropType.func,

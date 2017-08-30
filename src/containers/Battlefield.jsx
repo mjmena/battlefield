@@ -9,8 +9,13 @@ import EntityLayer from './EntityLayer';
 import MeasurementLayer from "./MeasurementLayer";
 import DrawingLayer from "./DrawingLayer";
 import {startMeasurement, updateMeasurement, stopMeasurement} from '../actions/PlayerActions';
-import {startDrawing, updateDrawing, stopDrawing} from '../actions/LocalActions';
-import {saveDrawing} from '../actions/DrawingActions'
+import {startDrawing, updateDrawing, stopDrawing, saveCoordinate} from '../actions/LocalActions';
+import {saveDrawing} from '../actions/DrawingActions';
+import {addEntity} from '../actions/EntityActions';
+
+import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
+
+const uuid = require('uuid/v4')
 
 class Battlefield extends React.Component {
   constructor(props) {
@@ -18,6 +23,7 @@ class Battlefield extends React.Component {
     this.onMouseDown = this.onMouseDown.bind(this);
     this.onMouseMove = this.onMouseMove.bind(this);
     this.onMouseUp = this.onMouseUp.bind(this);
+    this.onContextMenu = this.onContextMenu.bind(this);
   }
 
   onMouseDown(event) {
@@ -51,26 +57,59 @@ class Battlefield extends React.Component {
     if (this.props.players.getIn([this.props.playerId, 'measurement'])) {
       this.props.stopMeasurement(this.props.playerId)
     } else if (this.props.localDrawing) {
-      const simplifedCoordinates = simplify(this.props.localDrawing.toJS(), 4);
+      let simplifedCoordinates = this.props.localDrawing;
+      if (simplifedCoordinates > 1) {
+        simplifedCoordinates = simplify(simplifedCoordinates.toJS(), 4);
+      }
+
       this.props.saveDrawing(simplifedCoordinates);
       this.props.stopDrawing();
     }
   }
 
+  onContextMenu(event) {
+    this.props.saveCoordinate(event.pageX, event.pageY);
+  }
+
+  addEntity(event, data) {
+    console.log(data);
+    const x = Math.ceil(data.coordinate.get('x') / this.props.cellSize);
+    const y = Math.ceil(data.coordinate.get('y') / this.props.cellSize);
+    this.props.addEntity(uuid(), x, y);
+  }
+
   render() {
     return (
-      <Grid rows={50} columns={50} cellSize={this.props.cellSize}>
-        <svg style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          zIndex: 1
-        }} width="100%" height="100%" onMouseDown={this.onMouseDown} onMouseMove={this.onMouseMove} onMouseUp={this.onMouseUp}>
-          <EntityLayer/>
-          <DrawingLayer drawings={this.props.drawings} localDrawing={this.props.localDrawing}/>
-          <MeasurementLayer/>
-        </svg>
-      </Grid>
+      <div>
+        <ContextMenuTrigger id="battlefield_contextmenu">
+          <div style={{
+            vh: '100%',
+            vw: '100%',
+            margin: 0,
+            padding: 0
+          }}>
+            <Grid rows={50} columns={50} cellSize={this.props.cellSize}>
+
+              <svg style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+              }} width="100%" height="100%" onMouseDown={this.onMouseDown} onMouseMove={this.onMouseMove} onMouseUp={this.onMouseUp} onContextMenu={this.onContextMenu}>
+                <EntityLayer/>
+                <DrawingLayer drawings={this.props.drawings} localDrawing={this.props.localDrawing}/>
+                <MeasurementLayer/>
+              </svg>
+
+            </Grid>
+          </div>
+        </ContextMenuTrigger >
+        <ContextMenu id="battlefield_contextmenu">
+          <MenuItem data={{coordinate:this.props.savedCoordinate}} onClick={this.addEntity.bind(this)}>
+            Add Entity
+          </MenuItem>
+        </ContextMenu>
+      </div>
+
     )
   }
 }
@@ -88,7 +127,10 @@ Battlefield.propTypes = {
   startDrawing: PropTypes.func,
   updateDrawing: PropTypes.func,
   stopDrawing: PropTypes.func,
-  saveDrawing: PropTypes.func
+  saveDrawing: PropTypes.func,
+  addEntity: PropTypes.func,
+  saveCoordinate: PropTypes.func,
+  savedCoordinate: PropTypes.instanceOf(Immutable.Map)
 }
 
 const mapStateToProps = (state) => {
@@ -100,7 +142,8 @@ const mapStateToProps = (state) => {
     cellSize: grid.get("cellSize"),
     tool: state.getIn(["local", "tool"]),
     localDrawing: state.getIn(["local", "drawing"]),
-    drawings: state.get("drawings")
+    drawings: state.get("drawings"),
+    savedCoordinate: state.getIn(['local', 'coordinate'])
   }
 }
 
@@ -111,5 +154,7 @@ export default connect(mapStateToProps, {
   startDrawing,
   updateDrawing,
   stopDrawing,
-  saveDrawing
+  saveDrawing,
+  saveCoordinate,
+  addEntity
 })(Battlefield);

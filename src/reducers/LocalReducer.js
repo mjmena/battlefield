@@ -3,7 +3,8 @@ import {
   SELECT_TOOL,
   START_DRAWING,
   UPDATE_DRAWING,
-  STOP_DRAWING
+  STOP_DRAWING,
+  SAVE_COORDINATE
 } from '../actions/LocalActions';
 const initialState = Immutable.Map();
 
@@ -29,6 +30,9 @@ export default function reducer(state = initialState, action) {
       {
         return state.remove("drawing");
       }
+    case SAVE_COORDINATE:{
+      return state.set('coordinate', Immutable.Map({x:action.x, y:action.y}))
+    }
+    default:return state;
   }
-  return state;
 }

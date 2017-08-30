@@ -1,4 +1,4 @@
-import Immutable from 'immutable';
+const Immutable = require('immutable');
 
 const initialState = Immutable.Map({
   columns: 15,
@@ -6,6 +6,8 @@ const initialState = Immutable.Map({
   cellSize: 50
 });
 
-export default function reducer(state = initialState, action) {
+function reducer(state = initialState, action) {
   return state;
 }
+
+module.exports = reducer;

@@ -11,7 +11,7 @@ class MeasurementLayer extends React.Component {
       const measurement = player.get('measurement');
       if (measurement) {
         return <Measurement key={player.get('id')} {...measurement.toJSON()} cellSize={this.props.cellSize} color={player.get('color')}></Measurement>
-      }
+      } else return null;
     }).toList();
 
     return <g>{measurements}</g>

@@ -1,28 +1,26 @@
-import Immutable from 'immutable';
-import {
-	ADD_ENTITY,
-  ADD_LOCAL_ENTITY,
-  MOVE_ENTITY,
-  MOVE_LOCAL_ENTITY
-} from '../actions/EntityActions';
+const Immutable = require('immutable');
+const Actions = require('../actions/EntityActions');
 
-const initialState = Immutable.List();
+const initialState = Immutable.Map();
 
-export default function reducer(state = initialState, action) {
-  if (action.type === MOVE_ENTITY || action.type === MOVE_LOCAL_ENTITY) {
+function reducer(state = initialState, action) {
+  console.log(action)
+  if (action.type === Actions.MOVE_ENTITY || action.type === Actions.MOVE_LOCAL_ENTITY) {
     return state.mergeIn([action.id, "transform"], {
       x: action.x,
       y: action.y
     })
-  } else if (action.type === ADD_ENTITY || action.type === ADD_LOCAL_ENTITY) {
-    return state.push(Immutable.fromJS({
-      id: ""+state.size,
-      transform: {
+  } else if (action.type === Actions.ADD_ENTITY || action.type === Actions.ADD_LOCAL_ENTITY) {
+    return state.set(action.id, Immutable.Map({
+      id: action.id,
+      transform: Immutable.Map({
         x: action.x,
         y: action.y
-      }
+      })
     }));
   }
 
   return state;
 }
+
+module.exports = reducer;
