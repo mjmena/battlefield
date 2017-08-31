@@ -11,9 +11,10 @@ export function selectTool(tool) {
   }
 }
 
-export const startDrawing = (x, y) => {
+export const startDrawing = (id, x, y) => {
   return {
     type: START_DRAWING,
+    id,
     x,
     y
   }

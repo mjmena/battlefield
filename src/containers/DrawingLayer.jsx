@@ -6,13 +6,16 @@ import Drawing from '../components/Drawing'
 
 class DrawingLayer extends React.PureComponent {
   render() {
-    const paths = this.props.drawings.map((coordinates) => {
-      return <Drawing coordinates={coordinates} color="black" />
+    let drawings = this.props.drawings.map((drawing) => {
+      return <Drawing key={drawing.get("id")} coordinates={drawing.get("coordinates")} color="black" />
     }).toList()
 
-    return <g>
-      <Drawing coordinates={this.props.localDrawing} color="black"/>
-      {paths}
+    if(this.props.localDrawing){
+      drawings = drawings.push(<Drawing coordinates={this.props.localDrawing.get("coordinates")} color="black"/>)
+    }
+
+    return <g>  
+      {drawings}
     </g>
   }
 }

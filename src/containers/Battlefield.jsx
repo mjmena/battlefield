@@ -34,7 +34,7 @@ class Battlefield extends React.Component {
     } else if (this.props.tool === "DRAW") {
       const x = event.clientX;
       const y = event.clientY;
-      this.props.startDrawing(x, y)
+      this.props.startDrawing(uuid(), x, y)
     }
   }
 
@@ -57,12 +57,15 @@ class Battlefield extends React.Component {
     if (this.props.players.getIn([this.props.playerId, 'measurement'])) {
       this.props.stopMeasurement(this.props.playerId)
     } else if (this.props.localDrawing) {
-      let simplifedCoordinates = this.props.localDrawing;
-      if (simplifedCoordinates > 1) {
-        simplifedCoordinates = simplify(simplifedCoordinates.toJS(), 4);
-      }
+      const simplifedDrawing = this.props.localDrawing.update('coordinates', (coordinates)=>{
+        if (coordinates > 1) {
+          return simplify(coordinates.toJS(), 4);
+        }
+        return coordinates;
+      })
 
-      this.props.saveDrawing(simplifedCoordinates);
+
+      this.props.saveDrawing(simplifedDrawing);
       this.props.stopDrawing();
     }
   }

@@ -14,14 +14,21 @@ export default function reducer(state = initialState, action) {
       return state.set("tool", action.tool);
     case START_DRAWING:
       {
-        return state.set("drawing", Immutable.List([Immutable.Map({
-          x: action.x,
-          y: action.y
-        })]));
+        return state.set("drawing",
+          Immutable.Map({
+            id:action.id,
+            coordinates:Immutable.List([
+              Immutable.Map({
+                x: action.x,
+                y: action.y
+              })
+            ])
+          })
+        );
       }
     case UPDATE_DRAWING:
       {
-        return state.update("drawing", (drawing) => drawing.push(Immutable.Map({
+        return state.updateIn(["drawing", "coordinates"], (coordinates) => coordinates.push(Immutable.Map({
           x: action.x,
           y: action.y
         })))
