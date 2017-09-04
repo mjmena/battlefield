@@ -34,7 +34,9 @@ class Entity extends React.Component {
   }
 
   onClick() {
-    this.props.onSelectEntity(this.props.playerId, this.props.entityId);
+    if(this.props.tool === "SELECT"){
+        this.props.onSelectEntity(this.props.playerId, this.props.entityId);
+    }
   }
 
   render() {
