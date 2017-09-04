@@ -15,6 +15,9 @@ const entitySource = {
     const x = Math.ceil(coordinate.x / (props.radius * 2));
     const y = Math.ceil(coordinate.y / (props.radius * 2));
     props.onMoveEntity(props.entityId, x, y)
+  },
+  canDrag(props){
+    return props.tool === "SELECT";
   }
 }
 

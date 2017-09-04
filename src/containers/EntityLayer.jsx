@@ -23,6 +23,7 @@ class EntityLayer extends React.Component{
         selected: highlight
           ? highlight.get("color")
           : "",
+        tool:this.props.tool,
         onSelectEntity: this.props.onSelectEntity,
         onMoveEntity: this.props.onMoveEntity
       }
@@ -41,6 +42,7 @@ EntityLayer.propTypes = {
   entities: PropType.instanceOf(Immutable.List),
   players: PropType.instanceOf(Immutable.Map),
   cellSize: PropType.number,
+  tool: PropType.string,
   onSelectEntity: PropType.func,
   onMoveEntity: PropType.func
 }
@@ -50,7 +52,8 @@ const mapStateToProps = (state) => {
     playerId: state.getIn(["local", "playerId"]),
     cellSize: state.getIn(["grid","cellSize"]),
     entities: state.get('entities'),
-    players: state.get('players')
+    players: state.get('players'),
+    tool: state.getIn(["local", "tool"])
   }
 }
 
