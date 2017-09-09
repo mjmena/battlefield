@@ -8,8 +8,8 @@ import ColorPicker from './containers/ColorPicker';
 import PlayerList from './containers/PlayerList';
 import State from './containers/State';
 import Toolbar from './containers/Toolbar';
-import {DragDropContext} from 'react-dnd';
-import { default as TouchBackend } from 'react-dnd-touch-backend';
+import { DragDropContextProvider } from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
 
 
 const PlayerApp = ({store}) => {
@@ -28,22 +28,17 @@ const PlayerApp = ({store}) => {
 
   return (
     <Provider store={store}>
-      <div>
-        <div style={{
-          vh: '100%',
-          vw: '100%',
-          margin: 0,
-          padding: 0
-        }}>
+      <span>
+        <DragDropContextProvider backend={HTML5Backend}>
           <Battlefield/>
-        </div>
+        </DragDropContextProvider>
         <div style={pane}>
           <PlayerList/>
           <Toolbar/>
           <ColorPicker/>
           <State/>
         </div>
-      </div>
+        </span>
     </Provider>
   )
 }
@@ -52,4 +47,4 @@ PlayerApp.propTypes = {
   store: PropTypes.object
 }
 
-export default DragDropContext(TouchBackend({enableMouseEvents:true}))(PlayerApp)
+export default PlayerApp

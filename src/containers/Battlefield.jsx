@@ -84,27 +84,19 @@ class Battlefield extends React.Component {
   render() {
     return (
       <div>
-        <ContextMenuTrigger id="battlefield_contextmenu">
+        <ContextMenuTrigger id="battlefield_contextmenu" holdToDisplay={-1}>
           <div style={{
-            vh: '100%',
-            vw: '100%',
-            margin: 0,
-            padding: 0
-          }}>
+            position: 'absolute',
+            top: 0,
+            left: 0,
+          }} width="100%" height="100%" onMouseDown={this.onMouseDown} onMouseMove={this.onMouseMove} onMouseUp={this.onMouseUp} onContextMenu={this.onContextMenu}>
             <Grid rows={50} columns={50} cellSize={this.props.cellSize}>
-
-              <svg style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-              }} width="100%" height="100%" onMouseDown={this.onMouseDown} onMouseMove={this.onMouseMove} onMouseUp={this.onMouseUp} onContextMenu={this.onContextMenu}>
-                <EntityLayer/>
-                <DrawingLayer drawings={this.props.drawings} localDrawing={this.props.localDrawing}/>
-                <MeasurementLayer/>
-              </svg>
-
+              <EntityLayer/>
+              <MeasurementLayer />
+              <DrawingLayer drawings={this.props.drawings} localDrawing={this.props.localDrawing} />
             </Grid>
           </div>
+
         </ContextMenuTrigger >
         <ContextMenu id="battlefield_contextmenu">
           <MenuItem data={{coordinate:this.props.savedCoordinate}} onClick={this.addEntity.bind(this)}>

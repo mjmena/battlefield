@@ -14,7 +14,11 @@ class MeasurementLayer extends React.Component {
       } else return null;
     }).toList();
 
-    return <g>{measurements}</g>
+    return (
+      <svg width="100%" height="100%" style={{zIndex:-100}}>
+        {measurements}
+      </svg>
+    )
   }
 }
 

@@ -5,7 +5,7 @@ import Immutable from 'immutable';
 
 import {selectEntity} from '../actions/PlayerActions';
 import {moveEntity} from '../actions/EntityActions';
-import Entity from '../components/Entity';
+import DraggableEntity from '../components/DraggableEntity';
 
 class EntityLayer extends React.Component{
   render(){
@@ -20,26 +20,29 @@ class EntityLayer extends React.Component{
         x: entity.get("transform").get("x") * this.props.cellSize - this.props.cellSize,
         y: entity.get("transform").get("y") * this.props.cellSize - this.props.cellSize,
         radius: this.props.cellSize / 2,
-        selected: highlight
+        color: highlight
           ? highlight.get("color")
-          : "",
+          : "black",
         tool:this.props.tool,
         onSelectEntity: this.props.onSelectEntity,
         onMoveEntity: this.props.onMoveEntity
       }
 
-      return <Entity {...circle}></Entity>
+
+      return <DraggableEntity {...circle}></DraggableEntity>
     });
 
-    return <g>
-      {entities}
-    </g>
+    return(
+      <span>
+        {entities}
+      </span>
+    )
   }
 }
 
 EntityLayer.propTypes = {
   playerId: PropType.string,
-  entities: PropType.instanceOf(Immutable.List),
+  entities: PropType.instanceOf(Immutable.Map),
   players: PropType.instanceOf(Immutable.Map),
   cellSize: PropType.number,
   tool: PropType.string,
