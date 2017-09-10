@@ -6,7 +6,7 @@ import {
   STOP_DRAWING,
   SAVE_COORDINATE
 } from '../actions/LocalActions';
-const initialState = Immutable.Map();
+const initialState = Immutable.Map({tool:"SELECT"});
 
 export default function reducer(state = initialState, action) {
   switch (action.type) {

@@ -8,15 +8,6 @@ const io = require('socket.io')(server, {
   cookie: 'ggp-socket'
 });
 
-// var http = require('http')
-// // Send index.html to all requests
-// var app = http.createServer(function(req, res) {
-//     res.writeHead(200, {'Content-Type': 'text/html'});
-// });
-//
-// // Socket.io server listens to our app
-// var io = require('socket.io').listen(app);
-//
 server.listen(4000, () => {
   "listening"
 });
@@ -51,7 +42,6 @@ let players = Immutable.Map();
 io.on('connection', function(socket) {
   let playerId = null;
   let cookie = socket.client.request.headers.cookie;
-  console.log(cookie);
   if (cookie) {
     cookie = require('cookie').parse(cookie);
     playerId = players.find((value, key) => cookie['ggp-socket'] === key);
@@ -66,17 +56,14 @@ io.on('connection', function(socket) {
 
   players = players.set(socket.id, playerId);
 
-  const localState = store.getState().setIn(['local', 'playerId'], playerId);
-
+  let localState = store.getState().setIn(['local', 'playerId'], playerId);
+  localState = store.getState().setIn(['local', 'tool'], "SELECT");
   socket.emit('hydrate', localState.toJS());
 
   socket.on('action', function(action) {
-    console.log(action);
     store.dispatch(action);
     socket.broadcast.emit("action", getLocalAction(action));
   });
 
   socket.on("disconnect", () => {});
 });
-
-console.log("hello?")

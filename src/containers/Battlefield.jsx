@@ -89,7 +89,9 @@ class Battlefield extends React.Component {
             position: 'absolute',
             top: 0,
             left: 0,
-          }} width="100%" height="100%" onMouseDown={this.onMouseDown} onMouseMove={this.onMouseMove} onMouseUp={this.onMouseUp} onContextMenu={this.onContextMenu}>
+            width:"100vw",
+            height:"100vh",
+          }} onMouseDown={this.onMouseDown} onMouseMove={this.onMouseMove} onMouseUp={this.onMouseUp} onContextMenu={this.onContextMenu}>
             <Grid rows={50} columns={50} cellSize={this.props.cellSize}>
               <EntityLayer/>
               <MeasurementLayer />

@@ -4,11 +4,13 @@ import {DragSource} from 'react-dnd';
 
 import Entity from './Entity';
 import {ItemTypes} from '../Enums';
+import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 
 const entitySource = {
   beginDrag(props){
     return{
-      entityId: props.entityId
+      radius:props.radius,
+      color:props.color,
     }
   },
   endDrag(props, monitor){
@@ -37,7 +39,6 @@ function getStyles(props) {
     transform,
     WebkitTransform: transform,
     opacity: isDragging ? 0 : 1,
-    height: isDragging ? 0 : '',
   };
 }
 
@@ -45,6 +46,7 @@ class DraggableEntity extends React.Component {
   constructor(props) {
     super(props)
     this.onClick = this.onClick.bind(this)
+    this.handleDeleteEntityClick = this.handleDeleteEntityClick.bind(this);
   }
 
   onClick() {
@@ -53,12 +55,27 @@ class DraggableEntity extends React.Component {
     }
   }
 
+  handleDeleteEntityClick(event, data){
+    this.props.handleDeleteEntity(data.entityId);
+  }
+
   render() {
-    const {x, y, radius, color, connectDragSource} = this.props;
-    return connectDragSource(
-      <div  style={getStyles(this.props)}>
-        <Entity x={x} y={y} radius={radius} color={color} onClick={this.onClick}/>
-      </div>
+    const {entityId, radius, color, connectDragSource} = this.props;
+    return (
+      <span>
+        <svg width="50" height="50" viewBox='0 0 50 50' length="px" style={getStyles(this.props)}>
+            {connectDragSource(
+              <g onClick={this.onClick} onContextMenu={(event)=>console.log("onContextMenu")}>
+                <ContextMenuTrigger id={entityId + "EntityContextMenu"} renderTag='g'>
+                  <Entity radius={radius} color={color} />
+                </ContextMenuTrigger>
+              </g>
+            )}
+        </svg>
+        <ContextMenu id={entityId + "EntityContextMenu"}>
+          <MenuItem onClick={this.handleDeleteEntityClick} data={{entityId}}>Delete Entity</MenuItem>
+        </ContextMenu>
+      </span>
     )
   }
 }
@@ -72,6 +89,7 @@ DraggableEntity.propTypes = {
   selected: PropTypes.string,
   onSelectEntity: PropTypes.func,
   onMoveEntity: PropTypes.func,
+  handleDeleteEntity: PropTypes.func,
   connectDragSource: PropTypes.func.isRequired,
 }
 

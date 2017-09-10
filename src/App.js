@@ -9,8 +9,8 @@ import PlayerList from './containers/PlayerList';
 import State from './containers/State';
 import Toolbar from './containers/Toolbar';
 import { DragDropContextProvider } from 'react-dnd';
-import HTML5Backend from 'react-dnd-html5-backend';
-
+import MouseBackEnd from 'react-dnd-mouse-backend'
+import DragPreviewLayer from './components/DragPreviewLayer';
 
 const PlayerApp = ({store}) => {
   const pane = {
@@ -29,8 +29,11 @@ const PlayerApp = ({store}) => {
   return (
     <Provider store={store}>
       <span>
-        <DragDropContextProvider backend={HTML5Backend}>
-          <Battlefield/>
+        <DragDropContextProvider backend={MouseBackEnd}>
+          <span>
+            <Battlefield/>
+            <DragPreviewLayer />
+          </span>
         </DragDropContextProvider>
         <div style={pane}>
           <PlayerList/>
@@ -38,7 +41,7 @@ const PlayerApp = ({store}) => {
           <ColorPicker/>
           <State/>
         </div>
-        </span>
+      </span>
     </Provider>
   )
 }

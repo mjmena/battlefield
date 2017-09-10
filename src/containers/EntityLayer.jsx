@@ -4,7 +4,7 @@ import PropType from 'prop-types';
 import Immutable from 'immutable';
 
 import {selectEntity} from '../actions/PlayerActions';
-import {moveEntity} from '../actions/EntityActions';
+import {moveEntity, deleteEntity} from '../actions/EntityActions';
 import DraggableEntity from '../components/DraggableEntity';
 
 class EntityLayer extends React.Component{
@@ -25,12 +25,13 @@ class EntityLayer extends React.Component{
           : "black",
         tool:this.props.tool,
         onSelectEntity: this.props.onSelectEntity,
-        onMoveEntity: this.props.onMoveEntity
+        onMoveEntity: this.props.onMoveEntity,
+        handleDeleteEntity:this.props.handleDeleteEntity,
       }
 
 
       return <DraggableEntity {...circle}></DraggableEntity>
-    });
+    }).toList();
 
     return(
       <span>
@@ -47,7 +48,8 @@ EntityLayer.propTypes = {
   cellSize: PropType.number,
   tool: PropType.string,
   onSelectEntity: PropType.func,
-  onMoveEntity: PropType.func
+  onMoveEntity: PropType.func,
+  handleDeleteEntity: PropType.func,
 }
 
 const mapStateToProps = (state) => {
@@ -62,5 +64,6 @@ const mapStateToProps = (state) => {
 
 export default connect(mapStateToProps, {
   onSelectEntity: selectEntity,
-  onMoveEntity: moveEntity
+  onMoveEntity: moveEntity,
+  handleDeleteEntity: deleteEntity,
 })(EntityLayer);
