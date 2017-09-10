@@ -66,7 +66,7 @@ class DraggableEntity extends React.Component {
         <svg width="50" height="50" viewBox='0 0 50 50' length="px" style={getStyles(this.props)}>
             {connectDragSource(
               <g onClick={this.onClick} onContextMenu={(event)=>console.log("onContextMenu")}>
-                <ContextMenuTrigger id={entityId + "EntityContextMenu"} renderTag='g'>
+                <ContextMenuTrigger id={entityId + "EntityContextMenu"} renderTag='g' holdToDisplay={-1}>
                   <Entity radius={radius} color={color} />
                 </ContextMenuTrigger>
               </g>

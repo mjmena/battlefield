@@ -5,7 +5,9 @@ class Entity extends React.PureComponent {
   render() {
     const {radius, color} = this.props;
     return (
-      <circle cx={radius} cy={radius} r={radius} fill={color} />
+      <circle cx={radius} cy={radius} r={radius} fill={color} onMouseDown={(event) => {
+      	event.preventDefault()
+      }}/>
     )
   }
 }
