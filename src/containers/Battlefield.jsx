@@ -91,6 +91,9 @@ class Battlefield extends React.Component {
             left: 0,
             width:"100vw",
             height:"100vh",
+            margin:0,
+            padding:0,
+            overflow:"hidden",
           }} onMouseDown={this.onMouseDown} onMouseMove={this.onMouseMove} onMouseUp={this.onMouseUp} onContextMenu={this.onContextMenu}>
             <Grid rows={50} columns={50} cellSize={this.props.cellSize}>
               <EntityLayer/>
