@@ -8,9 +8,11 @@ import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 
 const entitySource = {
   beginDrag(props){
+    const {radius, localColor, handleSelectEntity, entityId, playerId} = props;
+    handleSelectEntity(playerId, entityId)
     return{
-      radius:props.radius,
-      color:props.color,
+      radius:radius,
+      color:localColor,
     }
   },
   endDrag(props, monitor){
@@ -24,9 +26,10 @@ const entitySource = {
   }
 }
 
-const collect = (connect) => {
+const collect = (connect, monitor) => {
   return {
-    connectDragSource: connect.dragSource()
+    connectDragSource: connect.dragSource(),
+    isDragging: monitor.isDragging(),
   }
 }
 
@@ -51,7 +54,7 @@ class DraggableEntity extends React.Component {
 
   onClick() {
     if(this.props.tool === "SELECT"){
-        this.props.onSelectEntity(this.props.playerId, this.props.entityId);
+        this.props.handleSelectEntity(this.props.playerId, this.props.entityId);
     }
   }
 
@@ -87,7 +90,8 @@ DraggableEntity.propTypes = {
   y: PropTypes.number,
   radius: PropTypes.number,
   selected: PropTypes.string,
-  onSelectEntity: PropTypes.func,
+  color: PropTypes.string.isRequired,
+  handleSelectEntity: PropTypes.func,
   onMoveEntity: PropTypes.func,
   handleDeleteEntity: PropTypes.func,
   connectDragSource: PropTypes.func.isRequired,

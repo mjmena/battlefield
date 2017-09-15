@@ -4,8 +4,9 @@ import PropTypes from 'prop-types';
 class Entity extends React.PureComponent {
   render() {
     const {radius, color} = this.props;
+    const strokeWidth = 4
     return (
-      <circle cx={radius} cy={radius} r={radius} fill={color} onMouseDown={(event) => {
+      <circle cx={radius} cy={radius} r={radius - strokeWidth/2} stroke={color} strokeWidth={strokeWidth} fill="black" onMouseDown={(event) => {
       	event.preventDefault()
       }}/>
     )

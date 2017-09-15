@@ -23,8 +23,9 @@ class EntityLayer extends React.Component{
         color: highlight
           ? highlight.get("color")
           : "black",
+        localColor:this.props.players.getIn([this.props.playerId, "color"]),
         tool:this.props.tool,
-        onSelectEntity: this.props.onSelectEntity,
+        handleSelectEntity: this.props.onSelectEntity,
         onMoveEntity: this.props.onMoveEntity,
         handleDeleteEntity:this.props.handleDeleteEntity,
       }
