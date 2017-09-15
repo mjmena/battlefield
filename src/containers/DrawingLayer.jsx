@@ -7,11 +7,11 @@ import Drawing from '../components/Drawing'
 class DrawingLayer extends React.PureComponent {
   render() {
     let drawings = this.props.drawings.map((drawing) => {
-      return <Drawing key={drawing.get("id")} coordinates={drawing.get("coordinates")} color="black" />
+      return <Drawing key={drawing.get("id")} coordinates={drawing.get("coordinates")} color={drawing.get("color")} />
     }).toList()
 
     if(this.props.localDrawing){
-      drawings = drawings.push(<Drawing coordinates={this.props.localDrawing.get("coordinates")} color="black"/>)
+      drawings = drawings.push(<Drawing coordinates={this.props.localDrawing.get("coordinates")} color={this.props.localDrawing.get("color")}/>)
     }
 
     return (

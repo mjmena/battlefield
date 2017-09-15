@@ -34,7 +34,7 @@ class Battlefield extends React.Component {
     } else if (this.props.tool === "DRAW") {
       const x = event.clientX;
       const y = event.clientY;
-      this.props.startDrawing(uuid(), x, y)
+      this.props.startDrawing(uuid(), this.props.players.getIn([this.props.playerId, "color"]), x, y)
     }
   }
 

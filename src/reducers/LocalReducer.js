@@ -17,6 +17,7 @@ export default function reducer(state = initialState, action) {
         return state.set("drawing",
           Immutable.Map({
             id:action.id,
+            color:action.color,
             coordinates:Immutable.List([
               Immutable.Map({
                 x: action.x,

@@ -11,7 +11,6 @@ function reducer(state = initialState, action) {
         return state.push(Immutable.fromJS(action.drawing))
       }
     default: return state;
-
   }
 }
 
