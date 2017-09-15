@@ -57,7 +57,6 @@ io.on('connection', function(socket) {
   players = players.set(socket.id, playerId);
 
   const localState = store.getState().mergeIn(['local'], {playerId, tool:"SELECT"});
-  // localState = store.getState().setIn(['local', 'tool'], "SELECT");
   socket.emit('hydrate', localState.toJS());
 
   socket.on('action', function(action) {

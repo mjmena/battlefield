@@ -5,6 +5,7 @@
   "proxy": "http://localhost:4000",
   "dependencies": {
     "concurrently": "^3.5.0",
+    "cookie": "^0.3.1",
     "immutable": "^3.8.1",
     "react": "^15.6.1",
     "react-color": "^2.13.5",
@@ -23,9 +24,14 @@
     "uuid": "^3.1.0"
   },
   "scripts": {
-    "start": "concurrently \"react-scripts start\" \"node api.js\"",
+    "start": "npm-run-all -p start:dev start:api",
+    "start:dev": "react-scripts start",
+    "start:api": "node api.js",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
+  },
+  "devDependencies": {
+    "npm-run-all": "^4.1.1"
   }
 }
